@@ -28,8 +28,8 @@ This project is designed to support individuals with dyslexia and other learning
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** HTML, CSS, JavaScript / React
-- **Backend:**  Python 
+- **Frontend:** React,TypeScript,TailwindCSS
+- **Backend:**  FASTAPI
 - **Accessibility:** ARIA roles, WCAG 2.1 standards
 - **APIs:** Google Text-to-Speech
 
