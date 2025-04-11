@@ -11,6 +11,8 @@ import Quiz from '../pages/Quiz';
 import QuizQuestions from '../pages/QuizQuestion';
 import QuizCompleted from '../pages/QuizCompleted';
 import Analysis from '../pages/Analysis';
+import Parents from '../pages/parents';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -58,6 +60,10 @@ const router = createBrowserRouter([
   {
     path: '/analysis',
     element: <Analysis />,
+  },
+  {
+    path: '/parents',
+    element: <Parents />,
   }
 ]);
 
