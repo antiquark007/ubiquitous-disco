@@ -1,0 +1,39 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+
+# Virtual environments
+venv/
+.env/
+env/
+.venv/
+
+# Environment variable files
+.env
+*.env
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Pytest / coverage
+.coverage
+htmlcov/
+.tox/
+.cache/
+pytest_cache/
+
+# MyPy
+.mypy_cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Uvicorn logs (if logging to file)
+*.log
