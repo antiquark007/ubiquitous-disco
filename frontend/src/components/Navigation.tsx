@@ -19,7 +19,6 @@ export function Navigation() {
             {[
               { icon: Home, text: 'Home', path: '/' },
               { icon: Info, text: 'About', path: '/about' },
-              { icon: Book, text: 'Research', path: '/research' },
               { icon: Phone, text: 'Contact', path: '/contact' },
             ].map(({ icon: Icon, text, path }) => (
               <button

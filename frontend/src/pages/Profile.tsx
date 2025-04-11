@@ -213,7 +213,6 @@ export default function Profile() {
                   </div>
                   <div className="text-center">
                     <h2 className="text-2xl font-semibold">{profileData.name || 'User'}</h2>
-                    <p className="text-gray-400">ID: {profileData.user_id}</p>
                   </div>
                 </div>
               </div>

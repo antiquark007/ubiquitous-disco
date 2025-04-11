@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
   BookOpen, 
-  Brain, 
   LogOut, 
   ChevronLeft, 
   ChevronRight,
@@ -10,7 +9,7 @@ import {
   BarChart2,
   User
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -19,6 +18,7 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   
   const handleLogout = () => {
     localStorage.removeItem('user_id');
@@ -27,13 +27,11 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
   };
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', active: true, onClick: () => navigate('/dashboard') },
-    { icon: BookOpen, label: 'Quiz', onClick: () => navigate('/quiz') },
-    { icon: Brain, label: 'Analysis', onClick: () => navigate('/analysis') },
-    { icon: Users, label: 'Community', onClick: () => navigate('/community') },
-    { icon: BarChart2, label: 'Analytics', onClick: () => navigate('/analytics') },
-    { icon: Brain, label: 'Parents', onClick: () => navigate('/parents') },
-    { icon: User, label: 'Profile', onClick: () => navigate('/profile') },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+    { icon: BookOpen, label: 'Quiz', path: '/quiz' },
+    { icon: BarChart2, label: 'Analysis', path: '/analysis' },
+    { icon: Users, label: 'Parents', path: '/parents' },
+    { icon: User, label: 'Profile', path: '/profile' },
   ];
 
   return (
@@ -53,20 +51,25 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
       </div>
 
       <nav className="flex-1 mt-8">
-        {menuItems.map(({ icon: Icon, label, active, onClick }) => (
-          <motion.button
-            key={label}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`w-full flex items-center p-4 space-x-4 text-left transition-colors ${
-              active ? 'bg-green-500/10 text-green-400' : 'text-white/80 hover:bg-green-500/5'
-            }`}
-            onClick={onClick}
-          >
-            <Icon className="w-5 h-5" />
-            {!isCollapsed && <span>{label}</span>}
-          </motion.button>
-        ))}
+        {menuItems.map(({ icon: Icon, label, path }) => {
+          const isActive = location.pathname === path;
+          return (
+            <motion.button
+              key={label}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`w-full flex items-center p-4 space-x-4 text-left transition-colors ${
+                isActive 
+                  ? 'bg-green-500/20 text-green-400 border-l-4 border-green-400' 
+                  : 'text-white/80 hover:bg-green-500/5'
+              }`}
+              onClick={() => navigate(path)}
+            >
+              <Icon className={`w-5 h-5 ${isActive ? 'text-green-400' : 'text-white/80'}`} />
+              {!isCollapsed && <span>{label}</span>}
+            </motion.button>
+          );
+        })}
       </nav>
 
       <div className="p-4 border-t border-green-500/10">
