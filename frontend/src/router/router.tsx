@@ -11,7 +11,7 @@ import Quiz from '../pages/Quiz';
 import QuizQuestions from '../pages/QuizQuestion';
 import QuizCompleted from '../pages/QuizCompleted';
 import Analysis from '../pages/Analysis';
-import Parents from '../pages/parents';
+import Parents from '../pages/Parents';
 
 const router = createBrowserRouter([
   {

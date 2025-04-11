@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  LogOut, 
-  ChevronLeft, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  LogOut,
+  ChevronLeft,
   ChevronRight,
   Users,
   BarChart2,
@@ -19,7 +19,7 @@ interface SidebarProps {
 export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const handleLogout = () => {
     localStorage.removeItem('user_id');
     localStorage.removeItem('userEmail');
@@ -41,7 +41,11 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
       className="h-screen bg-black/50 backdrop-blur-lg border-r border-green-500/10 flex flex-col relative z-10"
     >
       <div className="p-4 flex items-center justify-between">
-        {!isCollapsed && <h1 className="text-2xl font-bold text-green-400">DyslexiaAI</h1>}
+        {!isCollapsed && (
+          <h1 className="text-2xl font-bold text-green-400">
+            <button onClick={() => navigate('/dashboard')}>DyslexiaAI</button>
+          </h1>
+        )}
         <button
           onClick={toggleSidebar}
           className="p-2 rounded-lg hover:bg-green-500/10 transition-colors"
@@ -58,11 +62,10 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
               key={label}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`w-full flex items-center p-4 space-x-4 text-left transition-colors ${
-                isActive 
-                  ? 'bg-green-500/20 text-green-400 border-l-4 border-green-400' 
+              className={`w-full flex items-center p-4 space-x-4 text-left transition-colors ${isActive
+                  ? 'bg-green-500/20 text-green-400 border-l-4 border-green-400'
                   : 'text-white/80 hover:bg-green-500/5'
-              }`}
+                }`}
               onClick={() => navigate(path)}
             >
               <Icon className={`w-5 h-5 ${isActive ? 'text-green-400' : 'text-white/80'}`} />
