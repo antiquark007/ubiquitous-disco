@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Brain, BookOpen, Users } from 'lucide-react';
 import { ThreeScene } from '../components/ThreeScene';
 import { Navigation } from '../components/Navigation';
+import { useNavigate } from 'react-router-dom';
 
 function LandingPage() {
+  const navigate = useNavigate();
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -46,13 +48,31 @@ function LandingPage() {
             <p className="text-lg md:text-2xl text-white mb-8 max-w-3xl mx-auto">
               Discover cutting-edge solutions that blend neuroscience and technology to transform lives.
             </p>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              className="bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-green-600 text-black px-8 py-3 rounded-full font-semibold flex items-center mx-auto space-x-2 transition-transform shadow-lg"
-            >
-              <span>Get Started</span>
-              <ArrowRight className="w-5 h-5" />
-            </motion.button>
+            <motion.div
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.98 }}
+  className="inline-block"
+>
+  <button
+    onClick={() => navigate('/login')}
+    className="group relative overflow-hidden bg-gradient-to-r from-green-500 to-green-700 hover:from-green-400 hover:to-emerald-600 text-black px-10 py-4 rounded-xl font-semibold shadow-lg shadow-green-700/20"
+  >
+    <span className="absolute inset-0 w-0 bg-gradient-to-r from-emerald-300 to-teal-400 transition-all duration-300 ease-out group-hover:w-full"></span>
+    <span className="absolute inset-0 w-full h-full bg-[length:4px_4px] bg-grid-white/10 transition-all duration-300"></span>
+    <span className="relative flex items-center justify-center gap-2 z-10">
+      Get Started
+      <motion.div
+        initial={{ x: -5 }}
+        animate={{ x: 0 }}
+        whileHover={{ x: 5 }}
+        transition={{ duration: 0.3 }}
+      >
+        <ArrowRight className="w-5 h-5" />
+      </motion.div>
+    </span>
+    <span className="absolute bottom-0 right-0 w-16 h-8 rounded-tl-3xl bg-white/10 blur-sm transform translate-x-1/2 translate-y-1/2"></span>
+  </button>
+</motion.div>
           </motion.div>
         </section>
 
@@ -104,7 +124,9 @@ function LandingPage() {
               whileHover={{ scale: 1.1 }}
               className="bg-gradient-to-r from-green-500 to-green-700 text-black px-8 py-3 rounded-full font-semibold hover:from-green-400 hover:to-green-600 transition-transform shadow-lg"
             >
+              <button onClick={() => navigate('/contact')} >
               Schedule a Free Consultation
+              </button>
             </motion.button>
           </div>
         </section>
