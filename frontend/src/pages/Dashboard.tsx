@@ -31,7 +31,7 @@ function Sidebar({ isCollapsed, toggleSidebar }: { isCollapsed: boolean; toggleS
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', active: true },
     { icon: BookOpen, label: 'Quiz', onClick: () => navigate('/quiz') },
-    { icon: Brain, label: 'Analysis', onclick: () => navigate('/analysis') },
+    { icon: Brain, label: 'Analysis', onClick: () => navigate('/analysis') },
     { icon: Activity, label: 'Activities' },
     { icon: Users, label: 'Community' },
     { icon: BarChart2, label: 'Analytics' },
