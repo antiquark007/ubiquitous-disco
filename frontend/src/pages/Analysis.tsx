@@ -13,9 +13,11 @@ interface AnalysisResults {
   dyslexia_likelihood_percentage: number;
   risk_level: string;
   confidence_percentage: number;
-  reading_profile: string;
+  reading_profile: {
+    strengths: string[];
+    challenges: string[];
+  };
 }
-
 
 interface WebSocketMessage {
   status: 'progress' | 'complete' | 'error';
@@ -26,20 +28,20 @@ interface WebSocketMessage {
 }
 
 const Analysis: React.FC = () => {
-  const [step, setStep] = useState(1);
-  const [isSimulation, setIsSimulation] = useState(false);
+  const [step, setStep] = useState<number>(1);
+  const [isSimulation, setIsSimulation] = useState<boolean>(false);
   const [results, setResults] = useState<AnalysisResults | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [analysisProgress, setAnalysisProgress] = useState<AnalysisProgress>({
     stage: '',
     message: '',
-    percent: 0,
+    percent: 0
   });
-
+  
   const wsRef = useRef<WebSocket | null>(null);
 
-  // Cleanup WebSocket on unmount
+  // Clean up WebSocket when component unmounts
   useEffect(() => {
     return () => {
       if (wsRef.current) {
@@ -49,57 +51,68 @@ const Analysis: React.FC = () => {
     };
   }, []);
 
-  const startAnalysis = (simulate = false) => {
+  const startAnalysis = (simulate: boolean = false): void => {
     setIsSimulation(simulate);
-    setStep(2);
+    setStep(2); // Move to reading test step
   };
 
-  const handleWebSocketMessage = (event: MessageEvent) => {
+  const handleWebSocketMessage = (event: MessageEvent): void => {
     try {
       const data: WebSocketMessage = JSON.parse(event.data);
-
-      if (data.status === 'progress') {
-        setAnalysisProgress({
-          stage: data.stage ?? 'analyzing',
-          message: data.message ?? 'Processing...',
-          percent: data.percent ?? 0,
-        });
-      } else if (data.status === 'complete') {
-        if (data.report) {
-          setResults(data.report);
-        }
-        setLoading(false);
-        wsRef.current?.close();
-        wsRef.current = null;
-      } else if (data.status === 'error') {
-        setError(data.message || 'An error occurred during analysis');
-        setLoading(false);
-        wsRef.current?.close();
-        wsRef.current = null;
-      } else {
-        console.warn('Unknown WebSocket message status:', data.status);
+      
+      switch (data.status) {
+        case 'progress':
+          setAnalysisProgress({
+            stage: data.stage || 'analyzing',
+            message: data.message || 'Processing...',
+            percent: data.percent || 0
+          });
+          break;
+        case 'complete':
+          if (data.report) {
+            setResults(data.report);
+            setLoading(false);
+            if (wsRef.current) {
+              wsRef.current.close();
+              wsRef.current = null;
+            }
+          }
+          break;
+        case 'error':
+          setError(data.message || 'An error occurred during analysis');
+          setLoading(false);
+          if (wsRef.current) {
+            wsRef.current.close();
+            wsRef.current = null;
+          }
+          break;
+        default:
+          console.warn('Unknown WebSocket message status:', data.status);
       }
-    } catch {
+    } catch (err) {
       setError('Failed to parse WebSocket message');
       setLoading(false);
     }
   };
 
-  const startTest = async () => {
-    setStep(3);
+  const startTest = async (): Promise<void> => {
+    setStep(3); // Move to testing/results step
     setLoading(true);
     setError(null);
     setAnalysisProgress({
       stage: 'initializing',
       message: 'Starting analysis...',
-      percent: 0,
+      percent: 0
     });
 
     try {
       if (isSimulation) {
+        // Run simulated analysis
         const response = await fetch('http://localhost:8000/analyze/simulate', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          }
         });
 
         if (!response.ok) {
@@ -110,25 +123,28 @@ const Analysis: React.FC = () => {
         setResults(data);
         setLoading(false);
       } else {
-        // Real-time analysis via WebSocket
+        // Connect to WebSocket for real analysis
         if (wsRef.current) {
           wsRef.current.close();
         }
-
-        const socket = new WebSocket('ws://localhost:8000/ws/analyze');
-        wsRef.current = socket;
-
-        socket.onopen = () => {
-          socket.send(JSON.stringify({ command: 'start' }));
+        
+        wsRef.current = new WebSocket('ws://localhost:8000/ws/analyze');
+        
+        wsRef.current.onopen = (): void => {
+          if (wsRef.current) {
+            wsRef.current.send(JSON.stringify({ command: 'start' }));
+          }
         };
-
-        socket.onmessage = handleWebSocketMessage;
-
-        socket.onerror = () => {
+        
+        wsRef.current.onmessage = handleWebSocketMessage;
+        
+        wsRef.current.onerror = (): void => {
           setError('WebSocket connection error');
           setLoading(false);
-          wsRef.current?.close();
-          wsRef.current = null;
+          if (wsRef.current) {
+            wsRef.current.close();
+            wsRef.current = null;
+          }
         };
       }
     } catch (err) {
@@ -137,12 +153,15 @@ const Analysis: React.FC = () => {
     }
   };
 
-  const resetAnalysis = () => {
+  const resetAnalysis = (): void => {
     setStep(1);
     setResults(null);
     setError(null);
-    setAnalysisProgress({ stage: '', message: '', percent: 0 });
-
+    setAnalysisProgress({
+      stage: '',
+      message: '',
+      percent: 0
+    });
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
@@ -154,13 +173,19 @@ const Analysis: React.FC = () => {
       <header className="App-header">
         <h1>Dyslexia Analysis System</h1>
       </header>
-
+      
       <main className="App-main">
-        {step === 1 && <AnalysisForm onStart={startAnalysis} />}
-        {step === 2 && <ReadingTest onStart={startTest} isSimulation={isSimulation} />}
+        {step === 1 && (
+          <AnalysisForm onStart={startAnalysis} />
+        )}
+        
+        {step === 2 && (
+          <ReadingTest onStart={startTest} isSimulation={isSimulation} />
+        )}
+        
         {step === 3 && (
-          <Results
-            results={results}
+          <Results 
+            results={results} 
             loading={loading}
             error={error}
             onReset={resetAnalysis}
@@ -168,7 +193,7 @@ const Analysis: React.FC = () => {
           />
         )}
       </main>
-
+      
       <footer className="App-footer">
         <p>Dyslexia Analysis System © 2025</p>
       </footer>
