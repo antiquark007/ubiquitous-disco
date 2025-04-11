@@ -16,7 +16,7 @@ interface QuizLevel {
 }
 
 function Quiz() {
-  const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
+  const [, setSelectedLevel] = useState<number | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [quizLevels, setQuizLevels] = useState<QuizLevel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,7 +124,7 @@ function Quiz() {
                 <motion.div
                   key={level.id}
                   whileHover={{ scale: 1.02 }}
-                  className="bg-gray-800/50 rounded-xl p-6 border border-gray-700/50 backdrop-blur-sm"
+                  className="bg-gray-800/50 rounded-xl p-8 border border-gray-700/50 backdrop-blur-sm"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">

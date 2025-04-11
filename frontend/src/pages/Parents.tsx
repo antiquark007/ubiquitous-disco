@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, LineElement, PointElement, RadialLinearScale } from 'chart.js';
 import { Doughnut, Bar, Line, Radar, PolarArea } from 'react-chartjs-2';
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
+// import { jsPDF } from 'jspdf';
+// import html2canvas from 'html2canvas';
 import { ThreeScene } from '../components/ThreeScene';
 import { Sidebar } from '../components/Sidebar';
 import { motion } from 'framer-motion';
@@ -346,98 +346,98 @@ const Parents: React.FC = () => {
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
-  const handleDownloadPDF = async () => {
-    if (!resultsRef.current) return;
+  // const handleDownloadPDF = async () => {
+  //   if (!resultsRef.current) return;
 
-    try {
-      // Create a temporary container for the PDF content
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.top = '-9999px';
-      tempContainer.style.width = '800px';
-      tempContainer.style.backgroundColor = '#ffffff';
-      tempContainer.style.padding = '40px';
-      document.body.appendChild(tempContainer);
+  //   try {
+  //     // Create a temporary container for the PDF content
+  //     const tempContainer = document.createElement('div');
+  //     tempContainer.style.position = 'absolute';
+  //     tempContainer.style.left = '-9999px';
+  //     tempContainer.style.top = '-9999px';
+  //     tempContainer.style.width = '800px';
+  //     tempContainer.style.backgroundColor = '#ffffff';
+  //     tempContainer.style.padding = '40px';
+  //     document.body.appendChild(tempContainer);
 
-      // Clone the results content
-      const content = resultsRef.current.cloneNode(true) as HTMLElement;
-      tempContainer.appendChild(content);
+  //     // Clone the results content
+  //     const content = resultsRef.current.cloneNode(true) as HTMLElement;
+  //     tempContainer.appendChild(content);
 
-      // Remove the download and reset buttons from the cloned content
-      const buttons = content.querySelectorAll('button');
-      buttons.forEach(button => button.remove());
+  //     // Remove the download and reset buttons from the cloned content
+  //     const buttons = content.querySelectorAll('button');
+  //     buttons.forEach(button => button.remove());
 
-      // Update styles for PDF visibility
-      const elements = content.querySelectorAll('*');
-      elements.forEach(element => {
-        const el = element as HTMLElement;
-        // Update text colors
-        if (el.style.color.includes('white') || el.style.color.includes('gray')) {
-          el.style.color = '#000000';
-        }
-        // Update background colors
-        if (el.style.backgroundColor.includes('black') || el.style.backgroundColor.includes('gray')) {
-          el.style.backgroundColor = '#ffffff';
-        }
-        // Update border colors
-        if (el.style.borderColor.includes('green')) {
-          el.style.borderColor = '#10b981';
-        }
-      });
+  //     // Update styles for PDF visibility
+  //     const elements = content.querySelectorAll('*');
+  //     elements.forEach(element => {
+  //       const el = element as HTMLElement;
+  //       // Update text colors
+  //       if (el.style.color.includes('white') || el.style.color.includes('gray')) {
+  //         el.style.color = '#000000';
+  //       }
+  //       // Update background colors
+  //       if (el.style.backgroundColor.includes('black') || el.style.backgroundColor.includes('gray')) {
+  //         el.style.backgroundColor = '#ffffff';
+  //       }
+  //       // Update border colors
+  //       if (el.style.borderColor.includes('green')) {
+  //         el.style.borderColor = '#10b981';
+  //       }
+  //     });
 
-      // Wait for charts to render
-      await new Promise(resolve => setTimeout(resolve, 1000));
+  //     // Wait for charts to render
+  //     await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Capture the content with higher quality settings
-      const canvas = await html2canvas(tempContainer, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        width: 800,
-        height: content.scrollHeight,
-        allowTaint: true,
-        foreignObjectRendering: true,
-        onclone: (clonedDoc) => {
-          // Ensure charts are visible in the clone
-          const charts = clonedDoc.querySelectorAll('canvas');
-          charts.forEach(chart => {
-            chart.style.opacity = '1';
-            chart.style.visibility = 'visible';
-          });
-        }
-      });
+  //     // Capture the content with higher quality settings
+  //     const canvas = await html2canvas(tempContainer, {
+  //       scale: 2,
+  //       useCORS: true,
+  //       logging: false,
+  //       backgroundColor: '#ffffff',
+  //       width: 800,
+  //       height: content.scrollHeight,
+  //       allowTaint: true,
+  //       foreignObjectRendering: true,
+  //       onclone: (clonedDoc) => {
+  //         // Ensure charts are visible in the clone
+  //         const charts = clonedDoc.querySelectorAll('canvas');
+  //         charts.forEach(chart => {
+  //           chart.style.opacity = '1';
+  //           chart.style.visibility = 'visible';
+  //         });
+  //       }
+  //     });
 
-      // Clean up
-      document.body.removeChild(tempContainer);
+  //     // Clean up
+  //     document.body.removeChild(tempContainer);
 
-      // Create PDF with proper dimensions
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
+  //     // Create PDF with proper dimensions
+  //     const pdf = new jsPDF('p', 'mm', 'a4');
+  //     const imgWidth = 210;
+  //     const pageHeight = 297;
+  //     const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  //     let heightLeft = imgHeight;
+  //     let position = 0;
 
-      // Add first page
-      pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+  //     // Add first page
+  //     pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, position, imgWidth, imgHeight);
+  //     heightLeft -= pageHeight;
 
-      // Add new pages if content is longer than one page
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
+  //     // Add new pages if content is longer than one page
+  //     while (heightLeft >= 0) {
+  //       position = heightLeft - imgHeight;
+  //       pdf.addPage();
+  //       pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', 0, position, imgWidth, imgHeight);
+  //       heightLeft -= pageHeight;
+  //     }
 
-      // Save the PDF
-      pdf.save('dyslexia-assessment-results.pdf');
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    }
-  };
+  //     // Save the PDF
+  //     pdf.save('dyslexia-assessment-results.pdf');
+  //   } catch (error) {
+  //     console.error('Error generating PDF:', error);
+  //   }
+  // };
 
   const getChartData = () => {
     if (!result) return null;
