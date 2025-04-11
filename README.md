@@ -1,8 +1,8 @@
 # 🚀 [Enhanced Tools for Dyslexia and Learning Disabilities in Students]
 
-**Team Name:** _[Innov8ors]_  
-**Hackathon:** _[FantomCode2025]_  
-**Date:** _[12/04/2025]_
+**Team Name:** _Innov8ors_  
+**Hackathon:** _FantomCode2025_  
+**Date:** _12/04/2025_
 
 ---
 
@@ -20,19 +20,19 @@
 
 ## 🧠 Introduction
 
-_Our project presents an advanced educational tool that leverages eye-tracking and audio analysis to detect and support students with dyslexia and other learning disabilities. It builds a complete ecosystem connecting students, teachers, and support professionals to ensure early identification and intervention._
+Our project presents an advanced educational tool that leverages eye-tracking and audio analysis to detect and support students with dyslexia and other learning disabilities. It builds a complete ecosystem connecting students, teachers, and support professionals to ensure early identification and intervention.
 
 ---
 
 ## ❗ Problem Statement
 
-_Dyslexia affects 15–20% of the population, with many cases going undetected. Traditional diagnostic methods miss up to 50% of dyslexic students, delaying help and negatively impacting their academic growth and self-esteem. Our solution addresses the need for accurate, early diagnosis and tailored educational support._
+Dyslexia affects 15–20% of the population, with many cases going undetected. Traditional diagnostic methods miss up to 50% of dyslexic students, delaying help and negatively impacting their academic growth and self-esteem. Our solution addresses the need for accurate, early diagnosis and tailored educational support.
 
 ---
 
 ## ✅ Solution Overview
 
-_We propose a unified platform that:
+We propose a unified platform that:
 
 - Tracks eye movements in real-time during reading.
 - Analyzes audio to assess speech clarity and pace.
