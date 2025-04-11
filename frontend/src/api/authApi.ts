@@ -1,7 +1,7 @@
 import { RegisterFormData } from '../types';
 
 export const loginApi = async (email: string, password: string) => {
-    const response = await fetch('https://dylexia.onrender.com/login', {
+    const response = await fetch('https://dylexiaai.onrender.com/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -18,7 +18,7 @@ export const loginApi = async (email: string, password: string) => {
   
   export const registerApi = async (data: RegisterFormData) => {
     try {
-      const response = await fetch('https://dylexia.onrender.com/signup', {
+      const response = await fetch('https://dylexiaai.onrender.com/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

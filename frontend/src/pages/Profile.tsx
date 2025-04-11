@@ -71,7 +71,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`https://dylexia.onrender.com/profile?user_id=${profileData.user_id}`);
+        const response = await fetch(`https://dylexiaai.onrender.com/profile?user_id=${profileData.user_id}`);
         if (!response.ok) throw new Error('Failed to fetch profile');
         const data = await response.json();
         setProfileData(data);
@@ -116,7 +116,7 @@ export default function Profile() {
     try {
       const { user_id, ...updateData } = profileData;
       
-      const response = await fetch(`https://dylexia.onrender.com/update_profile?user_id=${userId}`, {
+      const response = await fetch(`https://dylexiaai.onrender.com/update_profile?user_id=${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

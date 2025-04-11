@@ -68,7 +68,7 @@ function QuizQuestion() {
     const fetchQuizData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://dylexia.onrender.com/quiz/${id}`, {
+        const response = await fetch(`https://dylexiaai.onrender.com/quiz/${id}`, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -147,14 +147,14 @@ function QuizQuestion() {
       };
 
       console.log('Assessment Submission Request Body:', JSON.stringify(assessmentResponse, null, 2));
-      console.log('Request URL:', `https://dylexia.onrender.com/assessment/submit?user_id=${userId}`);
+      console.log('Request URL:', `https://dylexiaai.onrender.com/assessment/submit?user_id=${userId}`);
       console.log('Request Method:', 'POST');
       console.log('Request Headers:', {
         'Content-Type': 'application/json'
       });
 
       try {
-        const response = await fetch(`https://dylexia.onrender.com/assessment/submit?user_id=${userId}`, {
+        const response = await fetch(`https://dylexiaai.onrender.com/assessment/submit?user_id=${userId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -206,14 +206,14 @@ function QuizQuestion() {
       };
 
       console.log('Quiz Submission Request Body:', JSON.stringify(completionData, null, 2));
-      console.log('Request URL:', `https://dylexia.onrender.com/quiz/submit?user_id=${userId}`);
+      console.log('Request URL:', `https://dylexiaai.onrender.com/quiz/submit?user_id=${userId}`);
       console.log('Request Method:', 'POST');
       console.log('Request Headers:', {
         'Content-Type': 'application/json'
       });
 
       try {
-        const response = await fetch(`https://dylexia.onrender.com/quiz/submit?user_id=${userId}`, {
+        const response = await fetch(`https://dylexiaai.onrender.com/quiz/submit?user_id=${userId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
