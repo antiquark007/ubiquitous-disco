@@ -7,7 +7,6 @@ import {
   LogOut, 
   ChevronLeft, 
   ChevronRight,
-  Activity,
   Users,
   BarChart2,
   Sparkles,
@@ -31,10 +30,10 @@ function Sidebar({ isCollapsed, toggleSidebar }: { isCollapsed: boolean; toggleS
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', active: true },
     { icon: BookOpen, label: 'Quiz', onClick: () => navigate('/quiz') },
-    { icon: Brain, label: 'Analysis', onClick: () => navigate('/analysis') },
-    { icon: Activity, label: 'Activities' },
+    { icon: Brain, label: 'Analysis', onclick: () => navigate('/analysis') },
     { icon: Users, label: 'Community' },
     { icon: BarChart2, label: 'Analytics' },
+    { icon: Brain, label: 'Parents', onClick: () => navigate('/parents') },
     { icon: User, label: 'Profile', onClick: () => navigate('/profile') },
   ];
 
