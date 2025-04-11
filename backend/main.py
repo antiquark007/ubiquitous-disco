@@ -276,24 +276,6 @@ def get_quizzes():
             "timeLimit": 25,
             "questions": 20,
             "icon": "Trophy"
-        },
-        {
-            "id": 4,
-            "title": "Parent-Assessment",
-            "description": "Assess your child's dyslexia",
-            "difficulty": "Easy",
-            "timeLimit": 15,
-            "questions": 10,
-            "icon": "Brain"
-        },
-        {
-            "id": 5,
-            "title": "Self-Assessment",
-            "description": "Assess your dyslexia",
-            "difficulty": "Easy",
-            "timeLimit": 15,
-            "questions": 10,
-            "icon": "Brain"
         }
     ]
     
@@ -302,7 +284,9 @@ def get_quizzes():
 @app.get("/quiz/{quiz_id}")
 def get_quiz(quiz_id: int):
     """Get a specific quiz by ID with all questions"""
-    quiz = quizzes.find_one({"id": quiz_id}, {"_id": 0})
+    print(f"Looking for quiz with ID: {quiz_id}, type: {type(quiz_id)}")
+    quiz = quizzes.find_one({"id": quiz_id})
+    print(f"Found quiz: {quiz}")
     if not quiz:
         raise HTTPException(status_code=404, detail=f"Quiz with ID {quiz_id} not found")
     return quiz

@@ -35,6 +35,7 @@ const games = [
 function Game() {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [cursorPosition, setCursorPosition] = React.useState({ x: 0, y: 0 });
+  const [selectedGameIndex, setSelectedGameIndex] = React.useState<number | null>(null);
   
   // Track mouse position for the glow effect
   React.useEffect(() => {
@@ -48,15 +49,47 @@ function Game() {
     };
   }, []);
 
+  // Staggered animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 50, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 12
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white relative overflow-hidden">
-      {/* Circular Disk Pointer */}
-      <div
-        className="pointer-events-none fixed top-0 left-0 w-[600px] h-[600px] rounded-full bg-gradient-to-r from-green-300 via-green-500 to-green-700 opacity-20 blur-[300px] transition-transform duration-75"
-        style={{
-          transform: `translate(${cursorPosition.x - 300}px, ${cursorPosition.y - 300}px)`,
+      {/* Circular Disk Pointer with enhanced glow */}
+      <motion.div
+        className="pointer-events-none fixed top-0 left-0 w-[600px] h-[600px] rounded-full bg-gradient-to-r from-green-300 via-green-500 to-green-700 opacity-20 blur-[300px]"
+        animate={{
+          x: cursorPosition.x - 300,
+          y: cursorPosition.y - 300,
+          scale: selectedGameIndex !== null ? 1.2 : 1
         }}
+        transition={{ type: "spring", damping: 15, stiffness: 50 }}
       />
+      
+      {/* Additional ambient glow elements */}
+      <div className="fixed top-1/4 -left-20 w-80 h-80 rounded-full bg-green-500/10 blur-[100px]" />
+      <div className="fixed bottom-1/3 -right-20 w-96 h-96 rounded-full bg-green-600/10 blur-[120px]" />
 
       {/* Three.js Background */}
       <div className="absolute inset-0">
@@ -66,42 +99,91 @@ function Game() {
       <div className="flex h-screen">
         <Sidebar isCollapsed={isCollapsed} toggleSidebar={() => setIsCollapsed(!isCollapsed)} />
         
-        <main className="flex-1 overflow-y-auto p-8 relative z-10">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-hidden relative z-10">
+          <div className="h-full flex flex-col p-8">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center mb-12"
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="text-center mb-8 md:mb-12"
             >
-              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-400 via-green-500 to-green-600 bg-clip-text text-transparent">
+              <motion.h1 
+                className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-green-400 via-green-500 to-green-600 bg-clip-text text-transparent"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              >
                 Fun Learning Games! 🎮
-              </h1>
-              <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+              </motion.h1>
+              <motion.p 
+                className="text-xl text-gray-400 max-w-2xl mx-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              >
                 Choose a game to start your learning adventure! Each game is designed to make learning fun and engaging.
-              </p>
+              </motion.p>
             </motion.div>
             
-            <motion.div
+            <div className="flex-grow flex items-center justify-center px-4 md:px-8 py-4">
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 w-full max-w-7xl"
+              >
+                {games.map((game, index) => (
+                  <motion.div
+                    key={game.path}
+                    variants={itemVariants}
+                    whileHover={{ 
+                      scale: 1.03, 
+                      transition: { duration: 0.2 } 
+                    }}
+                    onHoverStart={() => setSelectedGameIndex(index)}
+                    onHoverEnd={() => setSelectedGameIndex(null)}
+                    className="h-full"
+                  >
+                    <GameCard
+                      title={game.title}
+                      description={game.description}
+                      path={game.path}
+                      icon={<game.icon className="w-8 h-8 text-green-400" />}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+            
+            {/* Footer with animated particles */}
+            <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+              transition={{ delay: 1.2, duration: 1 }}
+              className="mt-auto pt-4 text-center relative h-16"
             >
-              {games.map((game, index) => (
+              <div className="text-gray-500 text-sm">
+                Explore and learn with interactive games designed for dyslexic learners
+              </div>
+              {/* Animated particles */}
+              {[...Array(8)].map((_, i) => (
                 <motion.div
-                  key={game.path}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <GameCard
-                    title={game.title}
-                    description={game.description}
-                    path={game.path}
-                    icon={<game.icon className="w-8 h-8 text-green-400" />}
-                  />
-                </motion.div>
+                  key={i}
+                  className="absolute w-2 h-2 rounded-full bg-green-500/30"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    bottom: `${Math.random() * 100}%`
+                  }}
+                  animate={{
+                    y: [0, -20, 0],
+                    opacity: [0.3, 0.8, 0.3]
+                  }}
+                  transition={{
+                    duration: 2 + Math.random() * 3,
+                    repeat: Infinity,
+                    delay: Math.random() * 2
+                  }}
+                />
               ))}
             </motion.div>
           </div>
