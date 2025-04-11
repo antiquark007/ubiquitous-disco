@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Sidebar } from '../components/Sidebar';
 import Image from '../assets/EWUw5H.gif'
 export default function Dashboard2() {

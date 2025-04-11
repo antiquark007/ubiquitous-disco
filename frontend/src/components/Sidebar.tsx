@@ -7,7 +7,8 @@ import {
   ChevronRight,
   Users,
   BarChart2,
-  User
+  User,
+  Gamepad
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -32,6 +33,7 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
     { icon: BarChart2, label: 'Analysis', path: '/analysis' },
     { icon: Users, label: 'Parents', path: '/parents' },
     { icon: User, label: 'Profile', path: '/profile' },
+    { icon: Gamepad,label:'Games',path :'/games'}
   ];
 
   return (

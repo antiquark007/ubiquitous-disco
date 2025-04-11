@@ -5,7 +5,7 @@ import { GameCardProps } from '../types';
 
 export function GameCard({ title, description, path, icon }: GameCardProps) {
   const navigate = useNavigate();
-  const [isHovering, setIsHovering] = React.useState(false);
+  const [, setIsHovering] = React.useState(false);
 
   const handleCardClick = () => {
     navigate(path);
@@ -13,8 +13,7 @@ export function GameCard({ title, description, path, icon }: GameCardProps) {
 
   const handleCardHover = () => {
     setIsHovering(true);
-    const utterance = new SpeechSynthesisUtterance(`${title}: ${description}`);
-    window.speechSynthesis.speak(utterance);
+    //window.speechSynthesis.speak(utterance);
   };
 
   return (

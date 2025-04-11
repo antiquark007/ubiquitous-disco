@@ -1,26 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Brain, 
-  BookOpen, 
-  ChevronLeft, 
-  ChevronRight,
-  Activity,
   Target,
   Clock,
-  Trophy,
-  Sparkles,
-  BarChart2,
-  Shield,
   Zap,
-  CheckCircle,
   Play,
-  Pause,
-  SkipForward,
   ArrowRight
 } from 'lucide-react';
 
-import AnalysisForm from '../components/Analysis/AnalysisForm';
 import ReadingTest from '../components/Analysis/ReadingTest';
 import Results from '../components/Analysis/Result';
 import { ThreeScene } from '../components/ThreeScene';

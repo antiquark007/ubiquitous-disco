@@ -1,9 +1,9 @@
 import React from 'react';
 import { Brain, Calculator, Mic, Palette } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { GameCard } from '../components/GameCard';
 import { Sidebar } from '../components/Sidebar';
 import { ThreeScene } from '../components/ThreeScene';
-import { GameCardProps } from '../types';
 
 const games = [
   {
@@ -35,20 +35,6 @@ const games = [
 function Game() {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const [cursorPosition, setCursorPosition] = React.useState({ x: 0, y: 0 });
-  
-  React.useEffect(() => {
-    const welcomeMessage = `Welcome to Fun Learning Games! We have ${games.length} exciting games for you to play. ${games.map(game => game.title + ": " + game.description).join(". ")}. Move your mouse over any game to learn more about it!`;
-    const utterance = new SpeechSynthesisUtterance(welcomeMessage);
-    window.speechSynthesis.speak(utterance);
-
-    // Prevent zooming on mobile devices
-    document.documentElement.style.touchAction = 'none';
-
-    // Cleanup speech synthesis when component unmounts
-    return () => {
-      window.speechSynthesis.cancel();
-    };
-  }, []);
   
   // Track mouse position for the glow effect
   React.useEffect(() => {
@@ -82,23 +68,42 @@ function Game() {
         
         <main className="flex-1 overflow-y-auto p-8 relative z-10">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-green-400 via-green-500 to-green-600 bg-clip-text text-transparent">
-              Fun Learning Games! 🎮
-            </h1>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-12"
+            >
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-400 via-green-500 to-green-600 bg-clip-text text-transparent">
+                Fun Learning Games! 🎮
+              </h1>
+              <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+                Choose a game to start your learning adventure! Each game is designed to make learning fun and engaging.
+              </p>
+            </motion.div>
             
-            <div className="fade-in">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {games.map((game) => (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+            >
+              {games.map((game, index) => (
+                <motion.div
+                  key={game.path}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
                   <GameCard
-                    key={game.path}
                     title={game.title}
                     description={game.description}
                     path={game.path}
-                    icon={<game.icon className="w-6 h-6 text-green-400" />}
+                    icon={<game.icon className="w-8 h-8 text-green-400" />}
                   />
-                ))}
-              </div>
-            </div>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </main>
       </div>

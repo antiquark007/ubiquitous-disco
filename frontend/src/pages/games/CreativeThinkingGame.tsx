@@ -1,6 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { SpeakButton } from '../../components/SpeakButton';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { CreativePrompt } from '../../types';
+
+interface AnalysisResult {
+  fluency: number;
+  originality: number;
+  elaboration: number;
+  flexibility: number;
+  overallScore: number;
+  feedback: string;
+}
 
 const prompts: CreativePrompt[] = [
   {
@@ -49,21 +58,16 @@ export const CreativeThinkingGame: React.FC = () => {
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [usedPrompts, setUsedPrompts] = useState<number[]>([]);
-
-  const speakPrompt = (text: string) => {
-    window.speechSynthesis.cancel(); // Cancel any ongoing speech
-    const utterance = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(utterance);
-  };
-
-  const getRandomEncouragement = () => {
-    return encouragements[Math.floor(Math.random() * encouragements.length)];
-  };
+  const [isRecording, setIsRecording] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const getNextPrompt = () => {
     const availablePrompts = prompts.filter(p => !usedPrompts.includes(p.id));
     if (availablePrompts.length === 0) {
-      setUsedPrompts([]); // Reset used prompts if all have been shown
+      setUsedPrompts([]);
       return prompts[Math.floor(Math.random() * prompts.length)];
     }
     return availablePrompts[Math.floor(Math.random() * availablePrompts.length)];
@@ -72,7 +76,6 @@ export const CreativeThinkingGame: React.FC = () => {
   const handleHintClick = () => {
     if (!showHints) {
       setShowHints(true);
-      speakPrompt(currentPrompt.hints[0]);
     }
   };
 
@@ -80,13 +83,67 @@ export const CreativeThinkingGame: React.FC = () => {
     if (currentHintIndex < currentPrompt.hints.length - 1) {
       const nextIndex = currentHintIndex + 1;
       setCurrentHintIndex(nextIndex);
-      speakPrompt(currentPrompt.hints[nextIndex]);
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        await analyzeSpeech(audioBlob);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const analyzeSpeech = async (audioBlob: Blob) => {
+    setIsAnalyzing(true);
+    try {
+      // Here you would typically send the audio to your backend for analysis
+      // For now, we'll simulate the analysis with a timeout
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Simulated analysis result
+      const result: AnalysisResult = {
+        fluency: Math.floor(Math.random() * 100),
+        originality: Math.floor(Math.random() * 100),
+        elaboration: Math.floor(Math.random() * 100),
+        flexibility: Math.floor(Math.random() * 100),
+        overallScore: Math.floor(Math.random() * 100),
+        feedback: "Your creative thinking skills show great potential! You demonstrated good fluency in expressing your ideas and showed originality in your approach. Keep practicing to improve your elaboration and flexibility."
+      };
+      
+      setAnalysisResult(result);
+      setIsAnalyzing(false);
+    } catch (error) {
+      console.error('Error analyzing speech:', error);
+      setIsAnalyzing(false);
     }
   };
 
   const nextPrompt = () => {
-    const encouragement = getRandomEncouragement();
-    speakPrompt(encouragement);
     setShowCelebration(true);
     
     setTimeout(() => {
@@ -96,71 +153,159 @@ export const CreativeThinkingGame: React.FC = () => {
       setShowHints(false);
       setCurrentHintIndex(0);
       setShowCelebration(false);
+      setAnalysisResult(null);
     }, 2000);
   };
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      speakPrompt(currentPrompt.question);
-    }, 500);
-    return () => clearTimeout(timeoutId);
-  }, [currentPrompt]);
-
   return (
-    <div className="max-w-2xl mx-auto p-8">
-      <h2 className="text-3xl font-bold text-center mb-8">Imagination Adventure</h2>
-      <div className="bg-white rounded-xl p-8 shadow-lg">
-        <div className="text-center mb-8">
-          <div className="mb-6 relative group">
-            <img 
-              src={currentPrompt.imageUrl} 
-              alt="Creative prompt"
-              className="w-64 h-64 mx-auto rounded-lg shadow-md object-cover transform transition-transform group-hover:scale-105"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
+      <div className="max-w-4xl mx-auto p-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-400 via-green-500 to-green-600 bg-clip-text text-transparent">
+            Imagination Adventure
+          </h2>
+          <p className="text-xl text-gray-400">
+            Let your creativity flow and share your ideas!
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-8 shadow-2xl border border-green-500/20"
+        >
+          <div className="text-center mb-8">
+            <div className="mb-6 relative group">
+              <img 
+                src={currentPrompt.imageUrl} 
+                alt="Creative prompt"
+                className="w-64 h-64 mx-auto rounded-lg shadow-md object-cover transform transition-transform group-hover:scale-105"
+              />
+            </div>
+            <h3 className="text-2xl font-bold mb-4 text-green-400">{currentPrompt.question}</h3>
+            <div className="flex justify-center gap-4 mb-6">
+              <button
+                onClick={handleHintClick}
+                className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white rounded-lg transition-all transform hover:scale-105"
+              >
+                Need Ideas? 💡
+              </button>
+            </div>
+            
+            {showHints && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6"
+              >
+                <div className="text-lg text-gray-300 mb-2 p-4 bg-gray-700/50 rounded-lg">
+                  {currentPrompt.hints[currentHintIndex]}
+                </div>
+                {currentHintIndex < currentPrompt.hints.length - 1 && (
+                  <button
+                    onClick={showNextHint}
+                    className="text-green-400 hover:text-green-300 underline"
+                  >
+                    Show me another idea ➡️
+                  </button>
+                )}
+              </motion.div>
+            )}
           </div>
-          <h3 className="text-2xl font-bold mb-4 text-indigo-600">{currentPrompt.question}</h3>
-          <div className="flex justify-center gap-4 mb-6">
-            <SpeakButton text={currentPrompt.question} />
+
+          <div className="flex flex-col items-center gap-4">
             <button
-              onClick={handleHintClick}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-md hover:bg-purple-700 transform transition-transform hover:scale-105"
+              onClick={isRecording ? stopRecording : startRecording}
+              className={`w-full py-4 text-xl rounded-lg transition-all transform hover:scale-105 ${
+                isRecording
+                  ? 'bg-red-500 hover:bg-red-600'
+                  : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500'
+              }`}
             >
-              Need Ideas? 💡
+              {isRecording ? 'Stop Recording' : 'Share Your Ideas 🎤'}
+            </button>
+
+            {isAnalyzing && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center"
+              >
+                <div className="text-xl text-gray-300">Analyzing your response...</div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mt-2"></div>
+              </motion.div>
+            )}
+
+            {analysisResult && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full mt-6 p-6 bg-gray-700/50 rounded-lg"
+              >
+                <h4 className="text-2xl font-bold text-green-400 mb-4">Analysis Results</h4>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="space-y-2">
+                    <div className="text-gray-300">Fluency</div>
+                    <div className="h-2 bg-gray-600 rounded-full">
+                      <div 
+                        className="h-full bg-green-500 rounded-full"
+                        style={{ width: `${analysisResult.fluency}%` }}
+                      ></div>
+                    </div>
+                    <div className="text-green-400">{analysisResult.fluency}%</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-gray-300">Originality</div>
+                    <div className="h-2 bg-gray-600 rounded-full">
+                      <div 
+                        className="h-full bg-green-500 rounded-full"
+                        style={{ width: `${analysisResult.originality}%` }}
+                      ></div>
+                    </div>
+                    <div className="text-green-400">{analysisResult.originality}%</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-gray-300">Elaboration</div>
+                    <div className="h-2 bg-gray-600 rounded-full">
+                      <div 
+                        className="h-full bg-green-500 rounded-full"
+                        style={{ width: `${analysisResult.elaboration}%` }}
+                      ></div>
+                    </div>
+                    <div className="text-green-400">{analysisResult.elaboration}%</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-gray-300">Flexibility</div>
+                    <div className="h-2 bg-gray-600 rounded-full">
+                      <div 
+                        className="h-full bg-green-500 rounded-full"
+                        style={{ width: `${analysisResult.flexibility}%` }}
+                      ></div>
+                    </div>
+                    <div className="text-green-400">{analysisResult.flexibility}%</div>
+                  </div>
+                </div>
+                <div className="text-gray-300">
+                  <p className="font-semibold text-green-400 mb-2">Overall Score: {analysisResult.overallScore}%</p>
+                  <p>{analysisResult.feedback}</p>
+                </div>
+              </motion.div>
+            )}
+
+            <button
+              onClick={nextPrompt}
+              className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white text-xl rounded-lg transition-all transform hover:scale-105"
+            >
+              Next Prompt ➡️
             </button>
           </div>
-          
-          {showHints && (
-            <div className="mb-6 animate-fade-in">
-              <div className="text-lg text-gray-700 mb-2 p-4 bg-purple-50 rounded-lg">
-                {currentPrompt.hints[currentHintIndex]}
-              </div>
-              {currentHintIndex < currentPrompt.hints.length - 1 && (
-                <button
-                  onClick={showNextHint}
-                  className="text-sm text-purple-600 hover:text-purple-700 underline"
-                >
-                  Show me another idea ➡️
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-        
-        <button
-          onClick={nextPrompt}
-          className="w-full py-4 bg-green-500 text-white text-xl rounded-lg hover:bg-green-600 transition-all transform hover:scale-105"
-        >
-          I Shared My Ideas! 🌟
-        </button>
-        
-        {showCelebration && (
-          <div className="mt-6 text-center animate-bounce">
-            <div className="text-4xl mb-2">✨ 🎨 🌟</div>
-            <div className="text-2xl text-indigo-600 font-bold">
-              {getRandomEncouragement()}
-            </div>
-          </div>
-        )}
+        </motion.div>
       </div>
     </div>
   );

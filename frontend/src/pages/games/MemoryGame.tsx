@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { MemoryCard } from '../../types';
-import { SpeakButton } from '../../components/SpeakButton';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Register ChartJS components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -170,10 +170,6 @@ export const MemoryGame: React.FC = () => {
     );
     setCards(newCards);
 
-    // Speak the word
-    const utterance = new SpeechSynthesisUtterance(card.word);
-    window.speechSynthesis.speak(utterance);
-
     // If this is the first card being flipped
     if (flippedCards.length === 0) {
       setFlippedCards([cardId]);
@@ -193,8 +189,6 @@ export const MemoryGame: React.FC = () => {
           setMatches(matches + 1);
           setFlippedCards([]);
           setIsProcessing(false);
-          const utterance = new SpeechSynthesisUtterance("Match found! Great job!");
-          window.speechSynthesis.speak(utterance);
         }, 500);
       } else {
         // No match - automatically flip cards back after a delay
@@ -206,8 +200,6 @@ export const MemoryGame: React.FC = () => {
           ));
           setFlippedCards([]);
           setIsProcessing(false);
-          const utterance = new SpeechSynthesisUtterance("Try again!");
-          window.speechSynthesis.speak(utterance);
         }, 1000);
       }
     }
@@ -223,9 +215,6 @@ export const MemoryGame: React.FC = () => {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
-      
-      const utterance = new SpeechSynthesisUtterance("Congratulations! You've found all the matches!");
-      window.speechSynthesis.speak(utterance);
     }
   }, [matches]);
 
@@ -509,47 +498,96 @@ export const MemoryGame: React.FC = () => {
     }
 
     return (
-      <div className="grid grid-cols-4 gap-4">
-        {cards.map(card => (
-          <div
-            key={card.id}
-            onClick={() => handleCardClick(card.id)}
-            className={`aspect-square cursor-pointer transition-all duration-300 transform ${
-              card.isFlipped ? 'rotate-y-180' : ''
-            }`}
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
+        <div className="max-w-4xl mx-auto p-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-12"
           >
-            <div className={`relative w-full h-full ${
-              card.isFlipped ? 'bg-white' : 'bg-green-600'
-            } rounded-xl shadow-lg hover:shadow-xl transition-shadow`}>
-              {card.isFlipped && (
-                <div className="w-full h-full flex flex-col items-center justify-center p-4">
-                  <img 
-                    src={card.imageUrl} 
-                    alt={card.word}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                  <p className="text-2xl font-bold mt-2">{card.word}</p>
-                </div>
-              )}
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-400 via-green-500 to-green-600 bg-clip-text text-transparent">
+              Memory Match
+            </h2>
+            <p className="text-xl text-gray-400">
+              Find all matching pairs of cards!
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-8 shadow-2xl border border-green-500/20"
+          >
+            <div className="flex justify-between items-center mb-8">
+              <div className="text-xl text-gray-300">
+                Moves: <span className="text-green-400">{moves}</span>
+              </div>
+              <button
+                onClick={startGame}
+                className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white rounded-lg transition-all transform hover:scale-105"
+              >
+                New Game
+              </button>
             </div>
-          </div>
-        ))}
+
+            <div className="grid grid-cols-4 gap-4">
+              {cards.map(card => (
+                <motion.div
+                  key={card.id}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleCardClick(card.id)}
+                  className={`aspect-square rounded-lg cursor-pointer ${
+                    card.isMatched ? 'opacity-50' : ''
+                  }`}
+                >
+                  <AnimatePresence>
+                    {card.isFlipped ? (
+                      <motion.div
+                        initial={{ rotateY: 90 }}
+                        animate={{ rotateY: 0 }}
+                        exit={{ rotateY: 90 }}
+                        className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500 to-green-600 rounded-lg text-4xl"
+                      >
+                        {card.word}
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ rotateY: -90 }}
+                        animate={{ rotateY: 0 }}
+                        exit={{ rotateY: -90 }}
+                        className="w-full h-full flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded-lg border-2 border-green-500/30"
+                      />
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </div>
+
+            {gameCompleted && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-8 text-center"
+              >
+                <h3 className="text-3xl font-bold text-green-400 mb-4">
+                  Congratulations! 🎉
+                </h3>
+                <p className="text-xl text-gray-300">
+                  You completed the game in {moves} moves!
+                </p>
+              </motion.div>
+            )}
+          </motion.div>
+        </div>
       </div>
     );
   };
 
   return (
     <div className="w-full">
-      <h2 className="text-3xl font-bold text-center mb-8 text-green-400">Memory Match</h2>
-      
-      {gameStarted && !gameCompleted && (
-        <div className="text-center mb-6 text-green-400">
-          <p className="text-2xl">Matches Found: {matches} / {initialCards.length / 2}</p>
-          <p className="text-xl">Time: {formatTime(gameTime)}</p>
-          <p className="text-xl">Moves: {moves}</p>
-        </div>
-      )}
-      
       {renderContent()}
     </div>
   );

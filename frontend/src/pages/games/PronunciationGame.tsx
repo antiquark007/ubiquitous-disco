@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SpeakButton } from '../../components/SpeakButton';
 import type { Word } from '../../types';
+import { motion } from 'framer-motion';
 
 interface PronunciationFeedback {
   accuracy: number;
@@ -161,55 +162,88 @@ export const PronunciationGame: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-8">
-      <h2 className="text-3xl font-bold text-center mb-8">Word Adventure</h2>
-      <div className="bg-dark rounded-xl p-8 shadow-lg border-green">
-        <div className="text-center mb-8">
-          <div className="mb-6">
-            <img 
-              src={currentWord.imageUrl} 
-              alt={currentWord.word}
-              className="w-48 h-48 mx-auto rounded-lg shadow-md"
-            />
-          </div>
-          <h3 className="text-6xl font-bold mb-4 text-green">{currentWord.word}</h3>
-          <p className="text-2xl text-gray-300 mb-4">Say it like: "{currentWord.pronunciation}"</p>
-          <div className="flex justify-center gap-4 mb-6">
-            <SpeakButton text={currentWord.word} />
-          </div>
-          <button
-            onClick={startListening}
-            disabled={isListening}
-            className="w-full py-4 bg-green-500 hover:bg-green-600 text-white text-xl rounded-lg transition-colors disabled:bg-gray-500"
-          >
-            {isListening ? 'Listening...' : 'I Can Say It! 🎤'}
-          </button>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
+      <div className="max-w-4xl mx-auto p-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-green-400 via-green-500 to-green-600 bg-clip-text text-transparent">
+            Word Adventure
+          </h2>
+          <p className="text-xl text-gray-400">
+            Practice pronouncing words and improve your speaking skills!
+          </p>
+        </motion.div>
 
-        {feedback && (
-          <div className="mt-4 bg-darker rounded-lg p-4">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green mb-2">
-                {Math.round(feedback.accuracy * 100)}%
-              </div>
-              <div className="text-xl text-gray-300 mb-4">
-                {feedback.accuracy >= 0.7 ? "Great job! 🌟" : "Try again! 💪"}
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="text-gray-300">You said:</div>
-                <div className="text-white text-right">"{feedback.userSaid}"</div>
-                <div className="text-gray-300">Expected:</div>
-                <div className="text-white text-right">"{feedback.expected}"</div>
-              </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="bg-gray-800/50 backdrop-blur-lg rounded-xl p-8 shadow-2xl border border-green-500/20"
+        >
+          <div className="text-center mb-8">
+            <div className="mb-6">
+              <img 
+                src={currentWord.imageUrl} 
+                alt={currentWord.word}
+                className="w-48 h-48 mx-auto rounded-lg shadow-lg border-2 border-green-500/30"
+              />
             </div>
+            <h3 className="text-6xl font-bold mb-4 bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent">
+              {currentWord.word}
+            </h3>
+            <p className="text-2xl text-gray-300 mb-4">
+              Say it like: <span className="text-green-400">"{currentWord.pronunciation}"</span>
+            </p>
+            <div className="flex justify-center gap-4 mb-6">
+              <SpeakButton text={currentWord.word} />
+            </div>
+            <button
+              onClick={startListening}
+              disabled={isListening}
+              className="w-full py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-400 hover:to-green-500 text-white text-xl rounded-lg transition-all transform hover:scale-105 disabled:bg-gray-600 disabled:transform-none"
+            >
+              {isListening ? 'Listening...' : 'I Can Say It! 🎤'}
+            </button>
           </div>
-        )}
 
-        {showCelebration && (
-          <div className="mt-4 text-center text-2xl">
-            🎉 Perfect! Moving to next word... 🎉
-          </div>
-        )}
+          {feedback && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 bg-gray-900/50 rounded-lg p-6 border border-green-500/20"
+            >
+              <div className="text-center">
+                <div className="text-4xl font-bold bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent mb-2">
+                  {Math.round(feedback.accuracy * 100)}%
+                </div>
+                <div className="text-xl text-gray-300 mb-4">
+                  {feedback.accuracy >= 0.7 ? "Great job! 🌟" : "Try again! 💪"}
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="text-gray-400">You said:</div>
+                  <div className="text-white text-right">"{feedback.userSaid}"</div>
+                  <div className="text-gray-400">Expected:</div>
+                  <div className="text-white text-right">"{feedback.expected}"</div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {showCelebration && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              className="mt-4 text-center text-2xl text-green-400"
+            >
+              🎉 Perfect! Moving to next word... 🎉
+            </motion.div>
+          )}
+        </motion.div>
       </div>
     </div>
   );
