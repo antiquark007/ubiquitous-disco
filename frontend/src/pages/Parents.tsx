@@ -1,4 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, LineElement, PointElement, RadialLinearScale } from 'chart.js';
+import { Doughnut, Bar, Line, Radar, PolarArea } from 'react-chartjs-2';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
+
+// Register ChartJS components
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, LineElement, PointElement, RadialLinearScale);
 
 // Define types
 interface Question {
@@ -16,11 +23,6 @@ interface CategoryScores {
   [key: string]: number;
 }
 
-interface ChildInfo {
-  name: string;
-  age: number;
-}
-
 interface Recommendations {
   [key: string]: string[];
 }
@@ -30,127 +32,265 @@ interface AnalysisResult {
   category_scores: CategoryScores;
   recommendations: Recommendations;
   severity_level: string;
-  child_info: ChildInfo;
 }
 
-const Parents: React.FC = () => {
-  // State for child information
-  const [childName, setChildName] = useState<string>('');
-  const [childAge, setChildAge] = useState<number | ''>('');
+const questions: Question[] = [
+  {
+    id: "q1",
+    text: "Does your child have difficulty recognizing rhyming words?",
+    category: "phonological_awareness"
+  },
+  {
+    id: "q2",
+    text: "Does your child struggle to break words into syllables?",
+    category: "phonological_awareness"
+  },
+  {
+    id: "q3",
+    text: "Does your child have trouble identifying individual sounds in words?",
+    category: "phonological_awareness"
+  },
+  {
+    id: "q4",
+    text: "Does your child frequently reverse letters or numbers?",
+    category: "visual_processing"
+  },
+  {
+    id: "q5",
+    text: "Does your child have difficulty tracking text while reading?",
+    category: "visual_processing"
+  },
+  {
+    id: "q6",
+    text: "Does your child complain of words appearing to move or blur?",
+    category: "visual_processing"
+  },
+  {
+    id: "q7",
+    text: "Does your child read very slowly compared to peers?",
+    category: "reading_fluency"
+  },
+  {
+    id: "q8",
+    text: "Does your child struggle with reading aloud?",
+    category: "reading_fluency"
+  },
+  {
+    id: "q9",
+    text: "Does your child frequently pause or hesitate while reading?",
+    category: "reading_fluency"
+  },
+  {
+    id: "q10",
+    text: "Does your child have trouble remembering multi-step instructions?",
+    category: "working_memory"
+  },
+  {
+    id: "q11",
+    text: "Does your child struggle to recall information from memory?",
+    category: "working_memory"
+  },
+  {
+    id: "q12",
+    text: "Does your child have difficulty organizing thoughts?",
+    category: "working_memory"
+  },
+  {
+    id: "q13",
+    text: "Does your child have trouble understanding what they read?",
+    category: "reading_comprehension"
+  },
+  {
+    id: "q14",
+    text: "Does your child struggle to answer questions about what they read?",
+    category: "reading_comprehension"
+  },
+  {
+    id: "q15",
+    text: "Does your child have difficulty making inferences from text?",
+    category: "reading_comprehension"
+  },
+  {
+    id: "q16",
+    text: "Does your child have difficulty spelling common words?",
+    category: "spelling"
+  },
+  {
+    id: "q17",
+    text: "Does your child spell the same word differently in the same piece of writing?",
+    category: "spelling"
+  },
+  {
+    id: "q18",
+    text: "Does your child have trouble remembering spelling rules?",
+    category: "spelling"
+  }
+];
+
+const categories: { [key: string]: string } = {
+  phonological_awareness: "Phonological Awareness",
+  visual_processing: "Visual Processing",
+  reading_fluency: "Reading Fluency",
+  working_memory: "Working Memory",
+  reading_comprehension: "Reading Comprehension",
+  spelling: "Spelling"
+};
+
+const analyzeResponses = (responses: { [key: string]: number }): AnalysisResult => {
+  // Calculate category scores
+  const categoryScores: CategoryScores = {};
+  const categoryCounts: { [key: string]: number } = {};
   
-  // State for responses
-  const [responses, setResponses] = useState<{ [key: string]: number }>({});
-  
-  // State for results
-  const [result, setResult] = useState<AnalysisResult | null>(null);
-  
-  // State for form progress
-  const [step, setStep] = useState<'info' | 'questions' | 'results'>('info');
-  
-  // Questions data (hardcoded to avoid API call for this example)
-  const questions: Question[] = [
-    {
-      id: "q1",
-      text: "Does your child have difficulty sounding out new words?",
-      category: "phonological_awareness"
-    },
-    {
-      id: "q2",
-      text: "Does your child confuse letters that look similar (like b/d, p/q)?",
-      category: "visual_processing"
-    },
-    {
-      id: "q3",
-      text: "Does your child struggle to blend sounds into words?",
-      category: "phonological_awareness"
-    },
-    {
-      id: "q4",
-      text: "Does your child read very slowly compared to peers?",
-      category: "reading_fluency"
-    },
-    {
-      id: "q5",
-      text: "Does your child have difficulty remembering sequences (like days of the week, months)?",
-      category: "working_memory"
-    },
-    {
-      id: "q6",
-      text: "Does your child struggle with spelling, even common words?",
-      category: "spelling"
-    },
-    {
-      id: "q7",
-      text: "Does your child have trouble following multi-step instructions?",
-      category: "working_memory"
-    },
-    {
-      id: "q8",
-      text: "Does your child skip words or lines when reading?",
-      category: "visual_processing"
-    },
-    {
-      id: "q9",
-      text: "Does your child have difficulty identifying rhyming words?",
-      category: "phonological_awareness"
-    },
-    {
-      id: "q10",
-      text: "Does your child struggle with handwriting or writing in a straight line?",
-      category: "visual_processing"
-    },
-    {
-      id: "q11",
-      text: "Does your child have difficulty understanding what they've read?",
-      category: "reading_comprehension"
-    },
-    {
-      id: "q12",
-      text: "Does your child mix up the order of letters in words when writing?",
-      category: "spelling"
-    },
-    {
-      id: "q13",
-      text: "Does your child avoid reading activities?",
-      category: "reading_fluency"
-    },
-    {
-      id: "q14",
-      text: "Does your child have trouble expressing thoughts clearly in writing?",
-      category: "reading_comprehension"
-    },
-    {
-      id: "q15",
-      text: "Does your child struggle with quick word recognition?",
-      category: "reading_fluency"
-    },
-    {
-      id: "q16",
-      text: "Does your child have trouble learning new vocabulary?",
-      category: "reading_comprehension"
-    },
-    {
-      id: "q17",
-      text: "Does your child find it difficult to break words into syllables?",
-      category: "phonological_awareness"
-    },
-    {
-      id: "q18",
-      text: "Does your child show good comprehension when material is read to them, compared to when they read themselves?",
-      category: "reading_comprehension"
-    },
-    {
-      id: "q19",
-      text: "Does your child confuse similar-sounding words (e.g., 'specific' and 'Pacific')?",
-      category: "working_memory"
-    },
-    {
-      id: "q20",
-      text: "Does your child have difficulty with writing tasks compared to other academic areas?",
-      category: "spelling"
+  questions.forEach(question => {
+    const category = question.category;
+    const response = responses[question.id] || 0;
+    
+    if (!categoryScores[category]) {
+      categoryScores[category] = 0;
+      categoryCounts[category] = 0;
     }
-  ];
+    
+    categoryScores[category] += response;
+    categoryCounts[category]++;
+  });
   
+  // Calculate average scores for each category
+  Object.keys(categoryScores).forEach(category => {
+    categoryScores[category] = categoryScores[category] / (categoryCounts[category] || 1);
+  });
+  
+  // Calculate overall score
+  const totalScore = Object.values(responses).reduce((sum, value) => sum + value, 0);
+  const overallScore = totalScore / (Object.keys(responses).length || 1);
+  
+  // Determine severity level
+  let severityLevel = "Minimal or No Indicators";
+  if (overallScore >= 80) {
+    severityLevel = "Strong Indicators";
+  } else if (overallScore >= 60) {
+    severityLevel = "Significant Indicators";
+  } else if (overallScore >= 40) {
+    severityLevel = "Moderate Indicators";
+  } else if (overallScore >= 20) {
+    severityLevel = "Mild Indicators";
+  }
+  
+  // Generate recommendations
+  const recommendations: Recommendations = {};
+  
+  Object.entries(categoryScores).forEach(([category, score]) => {
+    const categoryName = categories[category] || category;
+    recommendations[categoryName] = [];
+    
+    if (score >= 50) {
+      // Add high-score recommendations based on category
+      switch (category) {
+        case "phonological_awareness":
+          recommendations[categoryName] = [
+            "Practice breaking words into individual sounds (phonemes)",
+            "Play rhyming games and focus on word families",
+            "Use letter tiles or cards to build and segment words"
+          ];
+          break;
+        case "visual_processing":
+          recommendations[categoryName] = [
+            "Use colored overlays when reading",
+            "Try larger font sizes and increased spacing between lines",
+            "Practice visual tracking exercises"
+          ];
+          break;
+        case "reading_fluency":
+          recommendations[categoryName] = [
+            "Practice repeated reading of the same passages",
+            "Try paired reading with a parent or tutor",
+            "Use audiobooks alongside printed text"
+          ];
+          break;
+        case "working_memory":
+          recommendations[categoryName] = [
+            "Break instructions into smaller steps",
+            "Use memory games and activities daily",
+            "Create visual checklists and reminders"
+          ];
+          break;
+        case "reading_comprehension":
+          recommendations[categoryName] = [
+            "Pre-teach vocabulary before reading new material",
+            "Use graphic organizers to map out story elements",
+            "Practice visualization while reading"
+          ];
+          break;
+        case "spelling":
+          recommendations[categoryName] = [
+            "Use multisensory spelling methods (see, say, cover, write, check)",
+            "Focus on spelling patterns rather than memorization",
+            "Try assistive technology like spell checkers or dictation software"
+          ];
+          break;
+      }
+    } else if (score >= 25) {
+      // Add medium-score recommendations
+      switch (category) {
+        case "phonological_awareness":
+          recommendations[categoryName] = [
+            "Read books with rhyming patterns",
+            "Practice clapping syllables in words"
+          ];
+          break;
+        case "visual_processing":
+          recommendations[categoryName] = [
+            "Reduce visual clutter in reading materials",
+            "Practice visual discrimination activities"
+          ];
+          break;
+        case "reading_fluency":
+          recommendations[categoryName] = [
+            "Read aloud daily for short periods",
+            "Choose high-interest, lower-level texts"
+          ];
+          break;
+        case "working_memory":
+          recommendations[categoryName] = [
+            "Use mnemonic devices for remembering sequences",
+            "Practice recall activities with increasing complexity"
+          ];
+          break;
+        case "reading_comprehension":
+          recommendations[categoryName] = [
+            "Discuss stories before and after reading",
+            "Ask prediction questions while reading"
+          ];
+          break;
+        case "spelling":
+          recommendations[categoryName] = [
+            "Create personalized spelling lists based on errors",
+            "Use tactile methods like writing in sand or with textured materials"
+          ];
+          break;
+      }
+    }
+    
+    // If no significant issues, provide general encouragement
+    if (recommendations[categoryName].length === 0) {
+      recommendations[categoryName] = ["Continue supporting development in this area"];
+    }
+  });
+  
+  return {
+    overall_score: parseFloat(overallScore.toFixed(2)),
+    category_scores: categoryScores,
+    recommendations,
+    severity_level: severityLevel
+  };
+};
+
+const Parents: React.FC = () => {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+  const [responses, setResponses] = useState<{ [key: string]: number }>({});
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [step, setStep] = useState<'questions' | 'results'>('questions');
+  const resultsRef = useRef<HTMLDivElement>(null);
+
   const options: Option[] = [
     { value: 100, label: "Always (100%)" },
     { value: 75, label: "Often (75%)" },
@@ -158,450 +298,508 @@ const Parents: React.FC = () => {
     { value: 25, label: "Rarely (25%)" },
     { value: 0, label: "Never (0%)" }
   ];
-  
-  const categories: { [key: string]: string } = {
-    "phonological_awareness": "Phonological Awareness",
-    "visual_processing": "Visual Processing Skills",
-    "reading_fluency": "Reading Fluency",
-    "working_memory": "Working Memory",
-    "reading_comprehension": "Reading Comprehension",
-    "spelling": "Spelling & Writing"
-  };
 
-  // Submit child information and move to questions
-  const handleChildInfoSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (childName && childAge !== '') {
-      setStep('questions');
-    }
-  };
-
-  // Handle response change
   const handleResponseChange = (questionId: string, value: number) => {
     setResponses({
       ...responses,
       [questionId]: value
     });
+    
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
   };
 
-  // Submit assessment for analysis
   const handleSubmit = async () => {
     try {
-      // In a real application, you would call your API here
-      // For this example, we'll simulate the analysis using the provided analysis function
-      
-      // This would typically be an API call:
-      // const response = await axios.post('/api/analyze', {
-      //   child_name: childName,
-      //   child_age: childAge,
-      //   responses
-      // });
-      // setResult(response.data);
-      
-      // For this demo, we'll simulate the results with a simplified version of the analysis
-      const simpleAnalysis = analyzeResponses(childName, Number(childAge), responses);
-      setResult(simpleAnalysis);
+      const analysisResult = analyzeResponses(responses);
+      setResult(analysisResult);
       setStep('results');
     } catch (error) {
       console.error('Error analyzing results:', error);
-      alert('An error occurred while analyzing the results. Please try again.');
     }
   };
 
-  // Simple simulation of analysis function (simplified version of the provided Python function)
-  const analyzeResponses = (
-    name: string,
-    age: number,
-    responses: { [key: string]: number }
-  ): AnalysisResult => {
-    // Calculate category scores
-    const categoryScores: CategoryScores = {};
-    const categoryCounts: { [key: string]: number } = {};
-    
-    questions.forEach(question => {
-      const category = question.category;
-      const response = responses[question.id] || 0;
-      
-      if (!categoryScores[category]) {
-        categoryScores[category] = 0;
-        categoryCounts[category] = 0;
-      }
-      
-      categoryScores[category] += response;
-      categoryCounts[category]++;
-    });
-    
-    // Calculate average scores for each category
-    Object.keys(categoryScores).forEach(category => {
-      categoryScores[category] = categoryScores[category] / (categoryCounts[category] || 1);
-    });
-    
-    // Calculate overall score
-    const totalScore = Object.values(responses).reduce((sum, value) => sum + value, 0);
-    const overallScore = totalScore / (Object.keys(responses).length || 1);
-    
-    // Determine severity level
-    let severityLevel = "Minimal or No Indicators";
-    if (overallScore >= 80) {
-      severityLevel = "Strong Indicators";
-    } else if (overallScore >= 60) {
-      severityLevel = "Significant Indicators";
-    } else if (overallScore >= 40) {
-      severityLevel = "Moderate Indicators";
-    } else if (overallScore >= 20) {
-      severityLevel = "Mild Indicators";
-    }
-    
-    // Generate recommendations (simplified version)
-    const recommendations: Recommendations = {};
-    
-    Object.entries(categoryScores).forEach(([category, score]) => {
-      const categoryName = categories[category] || category;
-      recommendations[categoryName] = [];
-      
-      if (score >= 50) {
-        // Add high-score recommendations based on category
-        switch (category) {
-          case "phonological_awareness":
-            recommendations[categoryName] = [
-              "Practice breaking words into individual sounds (phonemes)",
-              "Play rhyming games and focus on word families",
-              "Use letter tiles or cards to build and segment words"
-            ];
-            break;
-          case "visual_processing":
-            recommendations[categoryName] = [
-              "Use colored overlays when reading",
-              "Try larger font sizes and increased spacing between lines",
-              "Practice visual tracking exercises"
-            ];
-            break;
-          case "reading_fluency":
-            recommendations[categoryName] = [
-              "Practice repeated reading of the same passages",
-              "Try paired reading with a parent or tutor",
-              "Use audiobooks alongside printed text"
-            ];
-            break;
-          case "working_memory":
-            recommendations[categoryName] = [
-              "Break instructions into smaller steps",
-              "Use memory games and activities daily",
-              "Create visual checklists and reminders"
-            ];
-            break;
-          case "reading_comprehension":
-            recommendations[categoryName] = [
-              "Pre-teach vocabulary before reading new material",
-              "Use graphic organizers to map out story elements",
-              "Practice visualization while reading"
-            ];
-            break;
-          case "spelling":
-            recommendations[categoryName] = [
-              "Use multisensory spelling methods (see, say, cover, write, check)",
-              "Focus on spelling patterns rather than memorization",
-              "Try assistive technology like spell checkers or dictation software"
-            ];
-            break;
-          default:
-            recommendations[categoryName] = ["Seek professional assessment"];
-        }
-      } else if (score >= 25) {
-        // Add medium-score recommendations
-        switch (category) {
-          case "phonological_awareness":
-            recommendations[categoryName] = [
-              "Read books with rhyming patterns",
-              "Practice clapping syllables in words"
-            ];
-            break;
-          case "visual_processing":
-            recommendations[categoryName] = [
-              "Reduce visual clutter in reading materials",
-              "Practice visual discrimination activities"
-            ];
-            break;
-          case "reading_fluency":
-            recommendations[categoryName] = [
-              "Read aloud daily for short periods",
-              "Choose high-interest, lower-level texts"
-            ];
-            break;
-          case "working_memory":
-            recommendations[categoryName] = [
-              "Use mnemonic devices for remembering sequences",
-              "Practice recall activities with increasing complexity"
-            ];
-            break;
-          case "reading_comprehension":
-            recommendations[categoryName] = [
-              "Discuss stories before and after reading",
-              "Ask prediction questions while reading"
-            ];
-            break;
-          case "spelling":
-            recommendations[categoryName] = [
-              "Create personalized spelling lists based on errors",
-              "Use tactile methods like writing in sand or with textured materials"
-            ];
-            break;
-          default:
-            recommendations[categoryName] = ["Monitor progress in this area"];
-        }
-      }
-      
-      // If no significant issues, provide general encouragement
-      if (recommendations[categoryName].length === 0) {
-        recommendations[categoryName] = ["Continue supporting development in this area"];
-      }
-    });
-    
-    // Format category scores for display
-    const formattedCategoryScores: CategoryScores = {};
-    Object.entries(categoryScores).forEach(([category, score]) => {
-      formattedCategoryScores[categories[category] || category] = parseFloat(score.toFixed(2));
-    });
-    
-    return {
-      overall_score: parseFloat(overallScore.toFixed(2)),
-      category_scores: formattedCategoryScores,
-      recommendations,
-      severity_level: severityLevel,
-      child_info: {
-        name,
-        age
-      }
-    };
-  };
-
-  // Reset the assessment
   const handleReset = () => {
-    setChildName('');
-    setChildAge('');
     setResponses({});
     setResult(null);
-    setStep('info');
+    setStep('questions');
+    setCurrentQuestionIndex(0);
   };
 
-  // Count answered questions
-  const answeredCount = Object.keys(responses).length;
-  const questionsComplete = answeredCount === questions.length;
+  const currentQuestion = questions[currentQuestionIndex];
+  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+
+  const handleDownloadPDF = async () => {
+    if (!resultsRef.current) return;
+
+    try {
+      const canvas = await html2canvas(resultsRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#000000',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save('dyslexia-assessment-results.pdf');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
+
+  const getChartData = () => {
+    if (!result) return null;
+
+    // Doughnut chart data for overall score
+    const doughnutData = {
+      labels: ['Score', 'Remaining'],
+      datasets: [
+        {
+          data: [result.overall_score, 100 - result.overall_score],
+          backgroundColor: ['#10b981', '#111827'],
+          borderWidth: 0,
+        },
+      ],
+    };
+
+    // Bar chart data for category scores
+    const barData = {
+      labels: Object.keys(result.category_scores).map(key => categories[key]),
+      datasets: [
+        {
+          label: 'Category Scores',
+          data: Object.values(result.category_scores),
+          backgroundColor: '#10b981',
+          borderRadius: 5,
+        },
+      ],
+    };
+
+    // Line chart data for severity trend
+    const severityData = {
+      labels: Object.keys(result.category_scores).map(key => categories[key]),
+      datasets: [
+        {
+          label: 'Severity Level',
+          data: Object.values(result.category_scores),
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          tension: 0.4,
+          fill: true,
+        },
+      ],
+    };
+
+    // Radar chart data for category comparison
+    const radarData = {
+      labels: Object.keys(result.category_scores).map(key => categories[key]),
+      datasets: [
+        {
+          label: 'Category Scores',
+          data: Object.values(result.category_scores),
+          backgroundColor: 'rgba(16, 185, 129, 0.2)',
+          borderColor: '#10b981',
+          pointBackgroundColor: '#10b981',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: '#10b981',
+        },
+      ],
+    };
+
+    // Polar area chart data
+    const polarData = {
+      labels: Object.keys(result.category_scores).map(key => categories[key]),
+      datasets: [
+        {
+          data: Object.values(result.category_scores),
+          backgroundColor: [
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(16, 185, 129, 0.6)',
+            'rgba(16, 185, 129, 0.4)',
+            'rgba(16, 185, 129, 0.2)',
+            'rgba(16, 185, 129, 0.1)',
+            'rgba(16, 185, 129, 0.05)',
+          ],
+          borderColor: '#10b981',
+        },
+      ],
+    };
+
+    return { doughnutData, barData, severityData, radarData, polarData };
+  };
+
+  const chartData = getChartData();
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      {step === 'info' && (
-        <div className="bg-white rounded-lg shadow-md p-6 mt-6">
-          <h2 className="text-xl font-semibold mb-4">Child Information</h2>
-          <form onSubmit={handleChildInfoSubmit}>
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="childName">
-                Child's Name:
-              </label>
-              <input
-                type="text"
-                id="childName"
-                className="w-full p-2 border border-gray-300 rounded"
-                value={childName}
-                onChange={(e) => setChildName(e.target.value)}
-                required
-              />
-            </div>
-            
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="childAge">
-                Child's Age:
-              </label>
-              <input
-                type="number"
-                id="childAge"
-                className="w-full p-2 border border-gray-300 rounded"
-                value={childAge}
-                onChange={(e) => setChildAge(e.target.value === '' ? '' : Number(e.target.value))}
-                min="3"
-                max="18"
-                required
-              />
-            </div>
-            
-            <button
-              type="submit"
-              className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-            >
-              Begin Assessment
-            </button>
-          </form>
-        </div>
-      )}
-      
-      {step === 'questions' && (
-        <div className="mt-6">
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-2">Dyslexia Assessment Questionnaire</h2>
-            <p className="text-gray-600 mb-4">
-              Please answer all questions based on your observations of {childName}.
-              For each question, indicate how frequently you observe the described behavior.
-            </p>
-            
-            <div className="mb-4 bg-blue-50 p-3 rounded">
-              <p className="font-medium">Progress: {answeredCount} of {questions.length} questions answered</p>
-              <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                <div 
-                  className="bg-blue-600 h-2.5 rounded-full" 
-                  style={{ width: `${(answeredCount / questions.length) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-          
-          {questions.map((question) => (
-            <div key={question.id} className="bg-white rounded-lg shadow-md p-6 mb-4">
-              <p className="mb-4">{question.text}</p>
-              <div className="flex flex-col sm:flex-row sm:space-x-4">
-                {options.map((option) => (
-                  <label key={option.value} className="flex items-center mb-2 sm:mb-0">
-                    <input
-                      type="radio"
-                      name={question.id}
-                      value={option.value}
-                      checked={responses[question.id] === option.value}
-                      onChange={() => handleResponseChange(question.id, option.value)}
-                      className="mr-2"
-                    />
-                    {option.label}
-                  </label>
-                ))}
-              </div>
-            </div>
-          ))}
-          
-          <div className="flex justify-between">
-            <button
-              onClick={() => setStep('info')}
-              className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600"
-            >
-              Back
-            </button>
-            
-            <button
-              onClick={handleSubmit}
-              disabled={!questionsComplete}
-              className={`py-2 px-4 rounded ${
-                questionsComplete
-                  ? 'bg-green-600 text-white hover:bg-green-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-            >
-              {questionsComplete 
-                ? 'Generate Report' 
-                : `Please Answer All Questions (${questions.length - answeredCount} remaining)`}
-            </button>
-          </div>
-        </div>
-      )}
-      
-      {step === 'results' && result && (
-        <div className="mt-6">
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-2xl font-bold mb-2">Assessment Results</h2>
-            <p className="mb-4">
-              Assessment for {result.child_info.name}, Age {result.child_info.age}
-            </p>
-            
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-2">Overall Result</h3>
-              <div className="bg-gray-100 p-4 rounded-lg">
-                <p className="text-lg font-medium">
-                  Severity Level: <span className="font-bold">{result.severity_level}</span>
-                </p>
-                <p className="text-gray-700">
-                  Overall Score: {result.overall_score}/100
-                </p>
-                <div className="w-full bg-gray-200 rounded-full h-4 mt-2">
-                  <div 
-                    className={`h-4 rounded-full ${
-                      result.overall_score >= 80 ? 'bg-red-600' :
-                      result.overall_score >= 60 ? 'bg-orange-500' :
-                      result.overall_score >= 40 ? 'bg-yellow-500' :
-                      result.overall_score >= 20 ? 'bg-blue-500' :
-                      'bg-green-500'
-                    }`}
-                    style={{ width: `${result.overall_score}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-2">Category Scores</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(result.category_scores).map(([category, score]) => (
-                  <div key={category} className="bg-gray-50 p-3 rounded-lg">
-                    <p className="font-medium">{category}</p>
-                    <div className="flex items-center mt-1">
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
-                        <div 
-                          className={`h-2.5 rounded-full ${
-                            score >= 80 ? 'bg-red-600' :
-                            score >= 60 ? 'bg-orange-500' :
-                            score >= 40 ? 'bg-yellow-500' :
-                            score >= 20 ? 'bg-blue-500' :
-                            'bg-green-500'
-                          }`}
-                          style={{ width: `${score}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-sm font-medium">{score}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="mb-6">
-              <h3 className="text-xl font-semibold mb-4">Recommendations</h3>
-              {Object.entries(result.recommendations).map(([category, recs]) => (
-                recs.length > 0 && (
-                  <div key={category} className="mb-4">
-                    <h4 className="font-medium text-lg">{category}</h4>
-                    <ul className="list-disc pl-5 mt-2">
-                      {recs.map((rec, index) => (
-                        <li key={index} className="mb-1">{rec}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )
-              ))}
-            </div>
-            
-            <div className="bg-blue-50 p-4 rounded-lg mb-6">
-              <p className="font-medium text-blue-800">Important Note</p>
-              <p className="text-blue-700 text-sm">
-                This assessment is designed as a screening tool only and does not constitute a 
-                professional diagnosis. If your child's results indicate moderate to strong 
-                indicators of dyslexia, we recommend consulting with an educational psychologist 
-                or dyslexia specialist for a comprehensive evaluation.
+    <div className="min-h-screen bg-black p-8">
+      <div className="max-w-7xl mx-auto">
+        {step === 'questions' ? (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold text-emerald-400 mb-2">
+                Dyslexia Assessment
+              </h1>
+              <p className="text-gray-400">
+                Please answer the following questions to assess your child's learning profile
               </p>
             </div>
-            
-            <div className="flex justify-between">
-              <button
-                onClick={handleReset}
-                className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-              >
-                Start New Assessment
-              </button>
-              
-              <button
-                onClick={() => window.print()}
-                className="bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700"
-              >
-                Print Report
-              </button>
+
+            <div className="bg-gray-900 rounded-xl p-8 border border-gray-800 shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <p className="text-gray-300">
+                  Question {currentQuestionIndex + 1} of {questions.length}
+                </p>
+                <div className="w-1/2 h-2 bg-gray-800 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-emerald-500 transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                <h2 className="text-xl font-semibold text-gray-100">
+                  {currentQuestion.text}
+                </h2>
+                
+                <div className="grid gap-4">
+                  {options.map((option) => (
+                    <button
+                      key={option.value}
+                      className={`w-full p-4 text-left rounded-lg transition-all duration-200 ${
+                        responses[currentQuestion.id] === option.value
+                          ? 'bg-emerald-500 text-white border border-emerald-400'
+                          : 'bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700 hover:border-emerald-400'
+                      }`}
+                      onClick={() => handleResponseChange(currentQuestion.id, option.value)}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-between mt-8">
+                <button
+                  className="px-6 py-2 border border-gray-700 rounded-lg text-gray-200 hover:bg-gray-800 hover:border-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+                  disabled={currentQuestionIndex === 0}
+                >
+                  Previous
+                </button>
+                
+                {currentQuestionIndex === questions.length - 1 && (
+                  <button
+                    className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 border border-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    onClick={handleSubmit}
+                    disabled={!responses[currentQuestion.id]}
+                  >
+                    Submit Assessment
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div ref={resultsRef} className="space-y-8">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold text-emerald-400 mb-2">
+                Assessment Results
+              </h1>
+              <p className="text-gray-400">
+                Detailed analysis of your child's learning profile
+              </p>
+            </div>
+
+            {result && chartData && (
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
+                    <h2 className="text-xl font-semibold text-gray-100 mb-4">
+                      Overall Score
+                    </h2>
+                    <div className="w-48 h-48 mx-auto">
+                      <Doughnut
+                        data={chartData.doughnutData}
+                        options={{
+                          cutout: '70%',
+                          plugins: {
+                            legend: {
+                              display: false,
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                    <div className="text-center mt-4">
+                      <p className="text-3xl font-bold text-emerald-400">
+                        {result.overall_score}%
+                      </p>
+                      <p className="text-gray-400">
+                        Severity Level: {result.severity_level}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
+                    <h2 className="text-xl font-semibold text-gray-100 mb-4">
+                      Category Scores
+                    </h2>
+                    <div className="h-64">
+                      <Bar
+                        data={chartData.barData}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          scales: {
+                            y: {
+                              beginAtZero: true,
+                              max: 100,
+                              grid: {
+                                color: '#111827',
+                              },
+                              ticks: {
+                                color: '#9ca3af',
+                              },
+                            },
+                            x: {
+                              grid: {
+                                display: false,
+                              },
+                              ticks: {
+                                color: '#9ca3af',
+                              },
+                            },
+                          },
+                          plugins: {
+                            legend: {
+                              display: false,
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
+                    <h2 className="text-xl font-semibold text-gray-100 mb-4">
+                      Severity Trend
+                    </h2>
+                    <div className="h-64">
+                      <Line
+                        data={chartData.severityData}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          scales: {
+                            y: {
+                              beginAtZero: true,
+                              max: 100,
+                              grid: {
+                                color: '#111827',
+                              },
+                              ticks: {
+                                color: '#9ca3af',
+                              },
+                            },
+                            x: {
+                              grid: {
+                                display: false,
+                              },
+                              ticks: {
+                                color: '#9ca3af',
+                              },
+                            },
+                          },
+                          plugins: {
+                            legend: {
+                              display: false,
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
+                    <h2 className="text-xl font-semibold text-gray-100 mb-4">
+                      Category Comparison
+                    </h2>
+                    <div className="h-64">
+                      <Radar
+                        data={chartData.radarData}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          scales: {
+                            r: {
+                              beginAtZero: true,
+                              max: 100,
+                              grid: {
+                                color: '#111827',
+                              },
+                              angleLines: {
+                                color: '#111827',
+                              },
+                              pointLabels: {
+                                color: '#9ca3af',
+                              },
+                              ticks: {
+                                color: '#9ca3af',
+                                backdropColor: 'transparent',
+                              },
+                            },
+                          },
+                          plugins: {
+                            legend: {
+                              display: false,
+                            },
+                          },
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
+                  <h2 className="text-xl font-semibold text-gray-100 mb-4">
+                    Category Distribution
+                  </h2>
+                  <div className="h-64">
+                    <PolarArea
+                      data={chartData.polarData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                          r: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                              color: '#111827',
+                            },
+                            ticks: {
+                              color: '#9ca3af',
+                              backdropColor: 'transparent',
+                            },
+                          },
+                        },
+                        plugins: {
+                          legend: {
+                            position: 'right',
+                            labels: {
+                              color: '#9ca3af',
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
+                  <h2 className="text-2xl font-bold text-emerald-400 mb-6">
+                    Recommendations
+                  </h2>
+                  <div className="grid gap-6">
+                    {Object.entries(result.recommendations).map(([category, recs]) => (
+                      <div key={category} className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-emerald-400 transition-all duration-300">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center">
+                            <h3 className="text-lg font-semibold text-emerald-400">
+                              {categories[category]}
+                            </h3>
+                            <div className="ml-4 w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-emerald-500 transition-all duration-500"
+                                style={{ width: `${result.category_scores[category]}%` }}
+                              />
+                            </div>
+                          </div>
+                          <span className="text-emerald-400 font-medium">
+                            {result.category_scores[category]}%
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          {recs.map((rec, index) => (
+                            <div key={index} className="flex items-start p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-all duration-200">
+                              <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-emerald-500 rounded-full mr-3 mt-1">
+                                <span className="text-white text-sm font-bold">{index + 1}</span>
+                              </div>
+                              <p className="text-gray-200 leading-relaxed">
+                                {rec}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="mt-4 pt-4 border-t border-gray-700">
+                          <div className="flex items-center text-sm text-gray-400">
+                            <svg className="w-4 h-4 mr-2 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Based on {categories[category]} assessment</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-8 p-6 bg-gray-800 rounded-lg border border-gray-700">
+                    <div className="flex items-center mb-4">
+                      <svg className="w-6 h-6 text-emerald-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <h3 className="text-lg font-semibold text-emerald-400">
+                        Next Steps
+                      </h3>
+                    </div>
+                    <div className="space-y-3">
+                      <p className="text-gray-300">
+                        These recommendations are based on your child's assessment results. Consider implementing them gradually and monitoring progress.
+                      </p>
+                      <p className="text-gray-300">
+                        For more detailed guidance, consult with educational specialists or schedule a follow-up assessment.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-center space-x-4">
+                  <button
+                    className="px-8 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 border border-emerald-400 transition-all duration-200 flex items-center"
+                    onClick={handleReset}
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Start New Assessment
+                  </button>
+                  <button
+                    className="px-8 py-3 bg-gray-800 text-emerald-400 rounded-lg hover:bg-gray-700 border border-emerald-400 transition-all duration-200 flex items-center"
+                    onClick={handleDownloadPDF}
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Download PDF Report
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
