@@ -28,8 +28,13 @@ This project is designed to support individuals with dyslexia and other learning
 
 ## 🛠️ Tech Stack
 
+<<<<<<< HEAD
+
 - **Frontend:** HTML, CSS, JavaScript / React
-- **Backend:**  Python 
+- # **Backend:** Python
+- **Frontend:** React,TypeScript,TailwindCSS
+- **Backend:** FASTAPI
+  > > > > > > > 352e3506ab7a6a436f7ab19b72ec467ffdd3c682
 - **Accessibility:** ARIA roles, WCAG 2.1 standards
 - **APIs:** Google Text-to-Speech
 
@@ -81,3 +86,5 @@ This project is licensed under the [MIT License](LICENSE).
 ## 🙌 Acknowledgments
 
 Thanks to all the educators, accessibility experts, and open-source contributors who inspire inclusive learning.
+
+
