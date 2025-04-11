@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { MemoryCard } from '../types';
-import { SpeakButton } from '../components/SpeakButton';
+import type { MemoryCard } from '../../types';
+import { SpeakButton } from '../../components/SpeakButton';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 

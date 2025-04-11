@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { SpeakButton } from '../components/SpeakButton';
-import type { CreativePrompt } from '../types';
+import { SpeakButton } from '../../components/SpeakButton';
+import type { CreativePrompt } from '../../types';
 
 const prompts: CreativePrompt[] = [
   {

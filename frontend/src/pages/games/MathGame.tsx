@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import type { MathProblem } from '../types';
-import { SpeakButton } from '../components/SpeakButton';
+import type { MathProblem } from '../../types';
+import { SpeakButton } from '../../components/SpeakButton';
 
 const generateProblem = (): MathProblem => {
   const num1 = Math.floor(Math.random() * 5) + 1;

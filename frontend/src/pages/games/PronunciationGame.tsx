@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { SpeakButton } from '../components/SpeakButton';
-import type { Word } from '../types';
+import { SpeakButton } from '../../components/SpeakButton';
+import type { Word } from '../../types';
 
 interface PronunciationFeedback {
   accuracy: number;

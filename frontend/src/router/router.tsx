@@ -12,7 +12,12 @@ import QuizQuestions from '../pages/QuizQuestion';
 import QuizCompleted from '../pages/QuizCompleted';
 import Analysis from '../pages/Analysis';
 import Parents from '../pages/Parents';
-import Dashboard2 from '../pages/Dashboard2';
+import Game from '../pages/Game';
+import { PronunciationGame } from '../pages/games/PronunciationGame';
+import { MathGame } from '../pages/games/MathGame';
+import { MemoryGame } from '../pages/games/MemoryGame';
+import { CreativeThinkingGame } from '../pages/games/CreativeThinkingGame';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -45,7 +50,8 @@ const router = createBrowserRouter([
   {
     path: '/contact',
     element: <Contact />,
-  },{
+  },
+  {
     path: '/quiz',
     element: <Quiz />,
   },
@@ -64,7 +70,28 @@ const router = createBrowserRouter([
   {
     path: '/parents',
     element: <Parents />,
-  }
+  },
+  // Game routes
+  {
+    path: '/games',
+    element: <Game />,
+  },
+  {
+    path: '/games/pronunciation',
+    element: <PronunciationGame />,
+  },
+  {
+    path: '/games/math',
+    element: <MathGame />,
+  },
+  {
+    path: '/games/memory',
+    element: <MemoryGame />,
+  },
+  {
+    path: '/games/creative',
+    element: <CreativeThinkingGame />,
+  },
 ]);
 
 export default router;
