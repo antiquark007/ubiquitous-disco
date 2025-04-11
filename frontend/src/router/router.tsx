@@ -12,7 +12,7 @@ import QuizQuestions from '../pages/QuizQuestion';
 import QuizCompleted from '../pages/QuizCompleted';
 import Analysis from '../pages/Analysis';
 import Parents from '../pages/Parents';
-
+import Dashboard2 from '../pages/Dashboard2';
 const router = createBrowserRouter([
   {
     path: '/',
