@@ -25,7 +25,7 @@ function Sidebar({ isCollapsed, toggleSidebar }: { isCollapsed: boolean; toggleS
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', onClick: () => navigate('/dashboard') },
     { icon: BookOpen, label: 'Quiz', active: true },
-    { icon: BrainIcon, label: 'Progress Tracking' },
+    { icon: BrainIcon, label: 'Analysis', onClick: () => navigate('/analysis') },
     { icon: Activity, label: 'Activities' },
     { icon: Users, label: 'Community' },
     { icon: BarChart2, label: 'Analytics' },

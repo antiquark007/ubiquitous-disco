@@ -10,6 +10,7 @@ import Error from '../components/Error';
 import Quiz from '../pages/Quiz';
 import QuizQuestions from '../pages/QuizQuestion';
 import QuizCompleted from '../pages/QuizCompleted';
+import Analysis from '../pages/Analysis';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
   {
     path:'/quiz-completed',
     element: <QuizCompleted />,
+  },
+  {
+    path: '/analysis',
+    element: <Analysis />,
   }
 ]);
 
