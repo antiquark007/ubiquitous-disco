@@ -29,8 +29,7 @@ interface QuizData {
 
 interface QuizCompletionData {
   quizId: number;
-  userId: string;
-  timeTaken: number; // in seconds
+  timeTaken: number;
   correctAnswers: number;
   totalQuestions: number;
 }
@@ -136,6 +135,7 @@ function QuizQuestion() {
 
     const endTime = Date.now();
     const timeTaken = Math.floor((endTime - startTime) / 1000); // Convert to seconds
+    const userId = localStorage.getItem('user_id') || '';
 
     if (isAssessment) {
       // Create simplified assessment response body
@@ -147,14 +147,14 @@ function QuizQuestion() {
       };
 
       console.log('Assessment Submission Request Body:', JSON.stringify(assessmentResponse, null, 2));
-      console.log('Request URL:', 'https://dylexia.onrender.com/assessment/submit');
+      console.log('Request URL:', `https://dylexia.onrender.com/assessment/submit?user_id=${userId}`);
       console.log('Request Method:', 'POST');
       console.log('Request Headers:', {
         'Content-Type': 'application/json'
       });
 
       try {
-        const response = await fetch('https://dylexia.onrender.com/assessment/submit', {
+        const response = await fetch(`https://dylexia.onrender.com/assessment/submit?user_id=${userId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -198,23 +198,22 @@ function QuizQuestion() {
       }
     } else {
       // Regular quiz completion logic
-      const completionData = {
+      const completionData: QuizCompletionData = {
         quizId: quizData.id,
-        userId: localStorage.getItem('user_id') || '',
         timeTaken,
         correctAnswers: score,
         totalQuestions: quizData.question_list.length
       };
 
       console.log('Quiz Submission Request Body:', JSON.stringify(completionData, null, 2));
-      console.log('Request URL:', 'https://dylexia.onrender.com/quiz/submit');
+      console.log('Request URL:', `https://dylexia.onrender.com/quiz/submit?user_id=${userId}`);
       console.log('Request Method:', 'POST');
       console.log('Request Headers:', {
         'Content-Type': 'application/json'
       });
 
       try {
-        const response = await fetch('https://dylexia.onrender.com/quiz/submit', {
+        const response = await fetch(`https://dylexia.onrender.com/quiz/submit?user_id=${userId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
