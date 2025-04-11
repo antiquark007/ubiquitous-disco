@@ -8,6 +8,8 @@ import About from '../pages/About';
 import Contact from '../pages/Contact';
 import Error from '../components/Error';
 import Quiz from '../pages/Quiz';
+import QuizQuestions from '../pages/QuizQuestion';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -43,6 +45,10 @@ const router = createBrowserRouter([
   },{
     path: '/quiz',
     element: <Quiz />,
+  },
+  {
+    path:'/quiz/:id',
+    element: <QuizQuestions />,
   }
 ]);
 
