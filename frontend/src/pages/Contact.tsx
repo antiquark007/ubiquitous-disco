@@ -2,6 +2,7 @@ import { useState,useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { ThreeScene } from '../components/ThreeScene';
+import { Sidebar } from '../components/Sidebar';
 
 interface ContactFormData {
   name: string;
@@ -23,6 +24,7 @@ function Contact() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
 
   useEffect(() => {
@@ -54,30 +56,38 @@ function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
-    {/* Circular Disk Pointer */}
-            <div
+    <div className="flex h-screen bg-black text-white relative overflow-hidden">
+      {/* Circular Disk Pointer */}
+      <div
         className="pointer-events-none fixed top-0 left-0 w-[600px] h-[600px] rounded-full bg-gradient-to-r from-green-300 via-green-500 to-green-700 opacity-15 blur-[200px] transition-transform duration-75"
         style={{
           transform: `translate(${cursorPosition.x - 300}px, ${cursorPosition.y - 300}px)`,
         }}
       ></div>
-      <ThreeScene />
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-green-400 via-green-500 to-green-600 bg-clip-text text-transparent">
-            Get in Touch
-          </h1>
-          <p className="text-lg text-white/80 max-w-2xl mx-auto">
-            Have questions or want to learn more about our dyslexia treatment solutions? We'd love to hear from you.
-          </p>
-        </motion.div>
+      {/* Three.js Background */}
+      <div className="absolute inset-0">
+        <ThreeScene />
+      </div>
+      
+      {/* Sidebar */}
+      <Sidebar isCollapsed={isCollapsed} toggleSidebar={() => setIsCollapsed(!isCollapsed)} />
+      
+      <main className="flex-1 overflow-y-auto relative z-10">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16"
+          >
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-green-400 via-green-500 to-green-600 bg-clip-text text-transparent">
+              Get in Touch
+            </h1>
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
+              Have questions or want to learn more about our dyslexia treatment solutions? We'd love to hear from you.
+            </p>
+          </motion.div>
 
         <div className="grid md:grid-cols-2 gap-12">
           {/* Contact Information */}
@@ -241,6 +251,7 @@ function Contact() {
           </motion.div>
         </div>
       </div>
+      </main>
     </div>
   );
 }

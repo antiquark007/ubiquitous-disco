@@ -37,6 +37,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { Sidebar } from '../components/Sidebar';
 
 ChartJS.register(
   CategoryScale,
@@ -233,6 +234,7 @@ const Analysis: React.FC = () => {
     percent: 0
   });
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -379,6 +381,7 @@ const Analysis: React.FC = () => {
       <div className="absolute inset-0">
         <ThreeScene />
       </div>
+      <Sidebar isCollapsed={isCollapsed} toggleSidebar={() => setIsCollapsed(!isCollapsed)} />      
 
       <main className="flex-1 p-8 overflow-y-auto relative z-10">
         <div className="max-w-7xl mx-auto">
