@@ -1,4 +1,4 @@
-# 🚀 [Enhanced Tools for Dyslexia and Learning Disabilities in Students]
+# 🚀 Enhanced Tools for Dyslexia and Learning Disabilities in Students
 
 **Team Name:** _Innov8ors_  
 **Hackathon:** _FantomCode2025_  
