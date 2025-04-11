@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { ThreeScene } from '../components/ThreeScene';
 import { useNavigate } from 'react-router-dom';
+import { Navigation } from '../components/Navigation';
 
 interface ProfileData {
   user_id: string;
@@ -118,6 +119,7 @@ export default function Profile() {
       setIsEditing(false);
       const updatedData = await response.json();
       setProfileData(updatedData);
+      navigate('/dashboard');
     } catch (error: any) {
       console.error('Error updating profile:', error);
       alert(error.message || 'Failed to update profile');

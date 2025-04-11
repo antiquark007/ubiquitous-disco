@@ -46,6 +46,7 @@ try:
     users = db["users"]
     quizzes = db["quizzes"]
     analysis_results = db["analysis_results"]
+    user_responses = db["user_responses"] 
 except Exception as e:
     print(f"MongoDB connection error: {e}")
 
@@ -129,6 +130,13 @@ class AnalysisResponse(BaseModel):
     confidence_percentage: float
     reading_profile: Dict[str, List[str]]
     visualization_url: Optional[str] = None
+    
+# Add this new model for quiz completion data
+class QuizCompletion(BaseModel):
+    quizId: int
+    timeTaken: int  # Time in seconds
+    correctAnswers: int
+    totalQuestions: int
 
 # =====================
 # Routes - Core API
@@ -347,6 +355,66 @@ def submit_quiz_result(submission: QuizSubmission):
     )
     
     return {"message": "Quiz results submitted successfully"}
+
+@app.post("/quiz/complete")
+def record_quiz_completion(
+    user_id: str = Query(..., description="User ID from MongoDB"),
+    completion_data: QuizCompletion = Body(...)
+):
+    """Record quiz completion data with user ID in query parameter"""
+    try:
+        user_oid = ObjectId(user_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+    
+    # Check if user exists
+    user = users.find_one({"_id": user_oid})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if quiz exists
+    quiz = quizzes.find_one({"id": completion_data.quizId})
+    if not quiz:
+        raise HTTPException(status_code=404, detail=f"Quiz with ID {completion_data.quizId} not found")
+    
+    # Calculate score percentage
+    score_percentage = round((completion_data.correctAnswers / completion_data.totalQuestions) * 100)
+    
+    # Create response document for the new collection
+    response_document = {
+        "user_id": user_id,
+        "quiz_id": completion_data.quizId,
+        "time_taken": completion_data.timeTaken,
+        "correct_answers": completion_data.correctAnswers,
+        "total_questions": completion_data.totalQuestions,
+        "score_percentage": score_percentage,
+        "completed_at": datetime.utcnow(),
+        "quiz_title": quiz.get("title", "Unknown Quiz")
+    }
+    
+    # Insert into the user_responses collection
+    user_responses.insert_one(response_document)
+    
+    # Also update the user document for quick access to user's quiz history
+    users.update_one(
+        {"_id": user_oid},
+        {
+            "$push": {
+                "quiz_completions": {
+                    "quiz_id": completion_data.quizId,
+                    "score_percentage": score_percentage,
+                    "completed_at": response_document["completed_at"]
+                }
+            }
+        }
+    )
+    
+    return {
+        "message": "Quiz completion recorded successfully",
+        "score_percentage": score_percentage,
+        "quiz_id": completion_data.quizId,
+        "completed_at": response_document["completed_at"].isoformat()
+    }
 
 # =====================
 # Routes - Dyslexia Analysis
