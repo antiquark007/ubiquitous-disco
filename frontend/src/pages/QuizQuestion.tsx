@@ -27,6 +27,26 @@ interface QuizData {
   question_list: Question[];
 }
 
+interface QuizCompletionData {
+  quizId: number;
+  userId: string;
+  timeTaken: number; // in seconds
+  correctAnswers: number;
+  totalQuestions: number;
+}
+
+interface AssessmentResponse {
+  responses: {
+    question: string;
+    answer: string;
+  }[];
+}
+
+interface UserResponse {
+  optionId: string;
+  isCorrect: boolean;
+}
+
 function QuizQuestion() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -39,9 +59,11 @@ function QuizQuestion() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<number>>(new Set());
-  const [userResponses, setUserResponses] = useState<Record<number, string>>({});
+  const [userResponses, setUserResponses] = useState<Record<number, UserResponse>>({});
+  const [startTime, setStartTime] = useState<number>(0);
 
   const isAssessment = id === '4' || id === '5';
+  const isRegularQuiz = id === '1' || id === '2' || id === '3';
 
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -61,6 +83,7 @@ function QuizQuestion() {
         const data = await response.json();
         setQuizData(data);
         setTimeLeft(data.timeLimit * 60);
+        setStartTime(Date.now());
         setError(null);
       } catch (err) {
         console.error('Error fetching quiz:', err);
@@ -80,37 +103,156 @@ function QuizQuestion() {
       }, 1000);
       return () => clearInterval(timer);
     } else if (timeLeft === 0 && quizData) {
-      navigate('/quiz-completed', {
-        state: {
-          score,
-          totalQuestions: quizData.question_list.length,
-          quizTitle: quizData.title,
-          timeUp: true,
-          isAssessment,
-          userResponses
-        }
-      });
+      handleQuizCompletion(true);
     }
-  }, [timeLeft, navigate, score, quizData, isAssessment, userResponses]);
+  }, [timeLeft, quizData]);
 
   const handleOptionSelect = (optionId: string) => {
     if (selectedOption || answeredQuestions.has(currentQuestionIndex)) return;
     
     setSelectedOption(optionId);
     setAnsweredQuestions(prev => new Set(prev).add(currentQuestionIndex));
-    setUserResponses(prev => ({ ...prev, [currentQuestionIndex]: optionId }));
     
-    if (!isAssessment) {
-      const currentQuestion = quizData?.question_list[currentQuestionIndex];
-      if (currentQuestion) {
-        const selectedOption = currentQuestion.options.find(opt => opt.id === optionId);
-        if (selectedOption?.isCorrect) {
-          setScore(prev => prev + 1);
-        }
+    const currentQuestion = quizData?.question_list[currentQuestionIndex];
+    if (currentQuestion) {
+      const selectedOption = currentQuestion.options.find(opt => opt.id === optionId);
+      const isCorrect = selectedOption?.isCorrect || false;
+      
+      setUserResponses(prev => ({
+        ...prev,
+        [currentQuestionIndex]: { optionId, isCorrect }
+      }));
+
+      if (isCorrect) {
+        setScore(prev => prev + 1);
       }
     }
     
     setShowExplanation(true);
+  };
+
+  const handleQuizCompletion = async (timeUp: boolean = false) => {
+    if (!quizData || !isRegularQuiz) return;
+
+    const endTime = Date.now();
+    const timeTaken = Math.floor((endTime - startTime) / 1000); // Convert to seconds
+
+    if (isAssessment) {
+      // Create simplified assessment response body
+      const assessmentResponse: AssessmentResponse = {
+        responses: Object.entries(userResponses).map(([questionIndex, response]) => ({
+          question: quizData.question_list[parseInt(questionIndex)].text,
+          answer: response.optionId
+        }))
+      };
+
+      console.log('Assessment Submission Request Body:', JSON.stringify(assessmentResponse, null, 2));
+      console.log('Request URL:', 'https://dylexia.onrender.com/assessment/submit');
+      console.log('Request Method:', 'POST');
+      console.log('Request Headers:', {
+        'Content-Type': 'application/json'
+      });
+
+      try {
+        const response = await fetch('https://dylexia.onrender.com/assessment/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(assessmentResponse)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to submit assessment results');
+        }
+
+        const result = await response.json();
+        console.log('Assessment Analysis Result:', result);
+
+        navigate('/quiz-completed', {
+          state: {
+            score: 0,
+            totalQuestions: quizData.question_list.length,
+            quizTitle: quizData.title,
+            timeUp: false,
+            isAssessment: true,
+            timeTaken,
+            correctAnswers: 0,
+            assessmentResult: result
+          }
+        });
+      } catch (error) {
+        console.error('Error submitting assessment:', error);
+        navigate('/quiz-completed', {
+          state: {
+            score: 0,
+            totalQuestions: quizData.question_list.length,
+            quizTitle: quizData.title,
+            timeUp: false,
+            isAssessment: true,
+            timeTaken,
+            correctAnswers: 0,
+            submissionError: true
+          }
+        });
+      }
+    } else {
+      // Regular quiz completion logic
+      const completionData = {
+        quizId: quizData.id,
+        userId: localStorage.getItem('user_id') || '',
+        timeTaken,
+        correctAnswers: score,
+        totalQuestions: quizData.question_list.length
+      };
+
+      console.log('Quiz Submission Request Body:', JSON.stringify(completionData, null, 2));
+      console.log('Request URL:', 'https://dylexia.onrender.com/quiz/submit');
+      console.log('Request Method:', 'POST');
+      console.log('Request Headers:', {
+        'Content-Type': 'application/json'
+      });
+
+      try {
+        const response = await fetch('https://dylexia.onrender.com/quiz/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(completionData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to submit quiz results');
+        }
+
+        navigate('/quiz-completed', {
+          state: {
+            score,
+            totalQuestions: quizData.question_list.length,
+            quizTitle: quizData.title,
+            timeUp: false,
+            isAssessment: false,
+            timeTaken,
+            correctAnswers: score
+          }
+        });
+      } catch (error) {
+        console.error('Error submitting quiz results:', error);
+        navigate('/quiz-completed', {
+          state: {
+            score,
+            totalQuestions: quizData.question_list.length,
+            quizTitle: quizData.title,
+            timeUp: false,
+            isAssessment: false,
+            timeTaken,
+            correctAnswers: score,
+            submissionError: true
+          }
+        });
+      }
+    }
   };
 
   const handleNextQuestion = () => {
@@ -119,16 +261,7 @@ function QuizQuestion() {
       setSelectedOption(null);
       setShowExplanation(false);
     } else {
-      navigate('/quiz-completed', {
-        state: {
-          score,
-          totalQuestions: quizData?.question_list.length,
-          quizTitle: quizData?.title,
-          timeUp: false,
-          isAssessment,
-          userResponses
-        }
-      });
+      handleQuizCompletion();
     }
   };
 

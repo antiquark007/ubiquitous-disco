@@ -9,7 +9,7 @@ import Contact from '../pages/Contact';
 import Error from '../components/Error';
 import Quiz from '../pages/Quiz';
 import QuizQuestions from '../pages/QuizQuestion';
-
+import QuizCompleted from '../pages/QuizCompleted';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -49,6 +49,10 @@ const router = createBrowserRouter([
   {
     path:'/quiz/:id',
     element: <QuizQuestions />,
+  },
+  {
+    path:'/quiz-completed',
+    element: <QuizCompleted />,
   }
 ]);
 
