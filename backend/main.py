@@ -356,37 +356,37 @@ def submit_quiz_result(submission: QuizSubmission):
     
     return {"message": "Quiz results submitted successfully"}
 
-@app.post("/quiz/complete")
-def record_quiz_completion(
+@app.post("/quiz/submit")
+def submit_quiz_result(
     user_id: str = Query(..., description="User ID from MongoDB"),
-    completion_data: QuizCompletion = Body(...)
+    quiz_data: dict = Body(...)
 ):
-    """Record quiz completion data with user ID in query parameter"""
+    """Submit quiz results for a user with user_id as query parameter"""
     try:
         user_oid = ObjectId(user_id)
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid user ID")
-    
+
     # Check if user exists
     user = users.find_one({"_id": user_oid})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     # Check if quiz exists
-    quiz = quizzes.find_one({"id": completion_data.quizId})
+    quiz = quizzes.find_one({"id": quiz_data.get("quizId")})
     if not quiz:
-        raise HTTPException(status_code=404, detail=f"Quiz with ID {completion_data.quizId} not found")
+        raise HTTPException(status_code=404, detail=f"Quiz with ID {quiz_data.get('quizId')} not found")
     
     # Calculate score percentage
-    score_percentage = round((completion_data.correctAnswers / completion_data.totalQuestions) * 100)
+    score_percentage = round((quiz_data.get("correctAnswers", 0) / quiz_data.get("totalQuestions", 1)) * 100)
     
-    # Create response document for the new collection
+    # Create response document
     response_document = {
         "user_id": user_id,
-        "quiz_id": completion_data.quizId,
-        "time_taken": completion_data.timeTaken,
-        "correct_answers": completion_data.correctAnswers,
-        "total_questions": completion_data.totalQuestions,
+        "quiz_id": quiz_data.get("quizId"),
+        "time_taken": quiz_data.get("timeTaken"),
+        "correct_answers": quiz_data.get("correctAnswers"),
+        "total_questions": quiz_data.get("totalQuestions"),
         "score_percentage": score_percentage,
         "completed_at": datetime.utcnow(),
         "quiz_title": quiz.get("title", "Unknown Quiz")
@@ -395,13 +395,13 @@ def record_quiz_completion(
     # Insert into the user_responses collection
     user_responses.insert_one(response_document)
     
-    # Also update the user document for quick access to user's quiz history
+    # Update the user document for quick access to user's quiz history
     users.update_one(
         {"_id": user_oid},
         {
             "$push": {
                 "quiz_completions": {
-                    "quiz_id": completion_data.quizId,
+                    "quiz_id": quiz_data.get("quizId"),
                     "score_percentage": score_percentage,
                     "completed_at": response_document["completed_at"]
                 }
@@ -410,9 +410,9 @@ def record_quiz_completion(
     )
     
     return {
-        "message": "Quiz completion recorded successfully",
+        "message": "Quiz results submitted successfully",
         "score_percentage": score_percentage,
-        "quiz_id": completion_data.quizId,
+        "quiz_id": quiz_data.get("quizId"),
         "completed_at": response_document["completed_at"].isoformat()
     }
 
