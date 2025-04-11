@@ -1,8 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, LineElement, PointElement, RadialLinearScale } from 'chart.js';
 import { Doughnut, Bar, Line, Radar, PolarArea } from 'react-chartjs-2';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { ThreeScene } from '../components/ThreeScene';
+import { Sidebar } from '../components/Sidebar';
 
 // Register ChartJS components
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, LineElement, PointElement, RadialLinearScale);
@@ -290,6 +292,20 @@ const Parents: React.FC = () => {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [step, setStep] = useState<'questions' | 'results'>('questions');
   const resultsRef = useRef<HTMLDivElement>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
+
+  // Track mouse position for the glow effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setCursorPosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
 
   const options: Option[] = [
     { value: 100, label: "Always (100%)" },
@@ -438,205 +454,262 @@ const Parents: React.FC = () => {
   const chartData = getChartData();
 
   return (
-    <div className="min-h-screen bg-black p-8">
-      <div className="max-w-7xl mx-auto">
-        {step === 'questions' ? (
-          <div className="space-y-8">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-emerald-400 mb-2">
-                Dyslexia Assessment
-              </h1>
-              <p className="text-gray-400">
-                Please answer the following questions to assess your child's learning profile
-              </p>
-            </div>
+    <div className="flex h-screen bg-black text-white relative overflow-hidden">
+      {/* Circular Disk Pointer */}
+      <div
+        className="pointer-events-none fixed top-0 left-0 w-[600px] h-[600px] rounded-full bg-gradient-to-r from-green-300 via-green-500 to-green-700 opacity-15 blur-[200px] transition-transform duration-75"
+        style={{
+          transform: `translate(${cursorPosition.x - 300}px, ${cursorPosition.y - 300}px)`,
+        }}
+      ></div>
 
-            <div className="bg-gray-900 rounded-xl p-8 border border-gray-800 shadow-2xl">
-              <div className="flex justify-between items-center mb-6">
-                <p className="text-gray-300">
-                  Question {currentQuestionIndex + 1} of {questions.length}
+      {/* Three.js Background */}
+      <div className="absolute inset-0">
+        <ThreeScene />
+      </div>
+
+      {/* Sidebar */}
+      <Sidebar isCollapsed={isCollapsed} toggleSidebar={() => setIsCollapsed(!isCollapsed)} />
+      
+      <main className="flex-1 overflow-y-auto p-8 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          {step === 'questions' ? (
+            <div className="space-y-8">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold text-emerald-400 mb-2">
+                  Dyslexia Assessment
+                </h1>
+                <p className="text-gray-400">
+                  Please answer the following questions to assess your child's learning profile
                 </p>
-                <div className="w-1/2 h-2 bg-gray-800 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-emerald-500 transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
               </div>
 
-              <div className="space-y-8">
-                <h2 className="text-xl font-semibold text-gray-100">
-                  {currentQuestion.text}
-                </h2>
-                
-                <div className="grid gap-4">
-                  {options.map((option) => (
-                    <button
-                      key={option.value}
-                      className={`w-full p-4 text-left rounded-lg transition-all duration-200 ${
-                        responses[currentQuestion.id] === option.value
-                          ? 'bg-emerald-500 text-white border border-emerald-400'
-                          : 'bg-gray-800 text-gray-200 border border-gray-700 hover:bg-gray-700 hover:border-emerald-400'
-                      }`}
-                      onClick={() => handleResponseChange(currentQuestion.id, option.value)}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
+              <div className="bg-gray-900/80 backdrop-blur-lg rounded-xl p-8 border border-gray-800 shadow-2xl">
+                <div className="flex justify-between items-center mb-6">
+                  <p className="text-gray-300">
+                    Question {currentQuestionIndex + 1} of {questions.length}
+                  </p>
+                  <div className="w-1/2 h-2 bg-gray-800 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-emerald-500 transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex justify-between mt-8">
-                <button
-                  className="px-6 py-2 border border-gray-700 rounded-lg text-gray-200 hover:bg-gray-800 hover:border-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                  onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
-                  disabled={currentQuestionIndex === 0}
-                >
-                  Previous
-                </button>
-                
-                {currentQuestionIndex === questions.length - 1 && (
+                <div className="space-y-8">
+                  <h2 className="text-xl font-semibold text-gray-100">
+                    {currentQuestion.text}
+                  </h2>
+                  
+                  <div className="grid gap-4">
+                    {options.map((option) => (
+                      <button
+                        key={option.value}
+                        className={`w-full p-4 text-left rounded-lg transition-all duration-200 ${
+                          responses[currentQuestion.id] === option.value
+                            ? 'bg-emerald-500 text-white border border-emerald-400'
+                            : 'bg-gray-800/90 text-gray-200 border border-gray-700 hover:bg-gray-700 hover:border-emerald-400'
+                        }`}
+                        onClick={() => handleResponseChange(currentQuestion.id, option.value)}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-between mt-8">
                   <button
-                    className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 border border-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                    onClick={handleSubmit}
-                    disabled={!responses[currentQuestion.id]}
+                    className="px-6 py-2 border border-gray-700 rounded-lg text-gray-200 hover:bg-gray-800 hover:border-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    onClick={() => setCurrentQuestionIndex(Math.max(0, currentQuestionIndex - 1))}
+                    disabled={currentQuestionIndex === 0}
                   >
-                    Submit Assessment
+                    Previous
                   </button>
-                )}
+                  
+                  {currentQuestionIndex === questions.length - 1 && (
+                    <button
+                      className="px-6 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 border border-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                      onClick={handleSubmit}
+                      disabled={!responses[currentQuestion.id]}
+                    >
+                      Submit Assessment
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div ref={resultsRef} className="space-y-8">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-emerald-400 mb-2">
-                Assessment Results
-              </h1>
-              <p className="text-gray-400">
-                Detailed analysis of your child's learning profile
-              </p>
-            </div>
+          ) : (
+            <div ref={resultsRef} className="space-y-8">
+              <div className="text-center">
+                <h1 className="text-4xl font-bold text-emerald-400 mb-2">
+                  Assessment Results
+                </h1>
+                <p className="text-gray-400">
+                  Detailed analysis of your child's learning profile
+                </p>
+              </div>
 
-            {result && chartData && (
-              <div className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
-                    <h2 className="text-xl font-semibold text-gray-100 mb-4">
-                      Overall Score
-                    </h2>
-                    <div className="w-48 h-48 mx-auto">
-                      <Doughnut
-                        data={chartData.doughnutData}
-                        options={{
-                          cutout: '70%',
-                          plugins: {
-                            legend: {
-                              display: false,
-                            },
-                          },
-                        }}
-                      />
-                    </div>
-                    <div className="text-center mt-4">
-                      <p className="text-3xl font-bold text-emerald-400">
-                        {result.overall_score}%
-                      </p>
-                      <p className="text-gray-400">
-                        Severity Level: {result.severity_level}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
-                    <h2 className="text-xl font-semibold text-gray-100 mb-4">
-                      Category Scores
-                    </h2>
-                    <div className="h-64">
-                      <Bar
-                        data={chartData.barData}
-                        options={{
-                          responsive: true,
-                          maintainAspectRatio: false,
-                          scales: {
-                            y: {
-                              beginAtZero: true,
-                              max: 100,
-                              grid: {
-                                color: '#111827',
-                              },
-                              ticks: {
-                                color: '#9ca3af',
-                              },
-                            },
-                            x: {
-                              grid: {
+              {result && chartData && (
+                <div className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-gray-900/80 backdrop-blur-lg p-8 rounded-xl border border-gray-800 shadow-2xl">
+                      <h2 className="text-xl font-semibold text-gray-100 mb-4">
+                        Overall Score
+                      </h2>
+                      <div className="w-48 h-48 mx-auto">
+                        <Doughnut
+                          data={chartData.doughnutData}
+                          options={{
+                            cutout: '70%',
+                            plugins: {
+                              legend: {
                                 display: false,
                               },
-                              ticks: {
-                                color: '#9ca3af',
-                              },
                             },
-                          },
-                          plugins: {
-                            legend: {
-                              display: false,
-                            },
-                          },
-                        }}
-                      />
+                          }}
+                        />
+                      </div>
+                      <div className="text-center mt-4">
+                        <p className="text-3xl font-bold text-emerald-400">
+                          {result.overall_score}%
+                        </p>
+                        <p className="text-gray-400">
+                          Severity Level: {result.severity_level}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
-                    <h2 className="text-xl font-semibold text-gray-100 mb-4">
-                      Severity Trend
-                    </h2>
-                    <div className="h-64">
-                      <Line
-                        data={chartData.severityData}
-                        options={{
-                          responsive: true,
-                          maintainAspectRatio: false,
-                          scales: {
-                            y: {
-                              beginAtZero: true,
-                              max: 100,
-                              grid: {
-                                color: '#111827',
+                    <div className="bg-gray-900/80 backdrop-blur-lg p-8 rounded-xl border border-gray-800 shadow-2xl">
+                      <h2 className="text-xl font-semibold text-gray-100 mb-4">
+                        Category Scores
+                      </h2>
+                      <div className="h-64">
+                        <Bar
+                          data={chartData.barData}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                              y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                  color: '#111827',
+                                },
+                                ticks: {
+                                  color: '#9ca3af',
+                                },
                               },
-                              ticks: {
-                                color: '#9ca3af',
+                              x: {
+                                grid: {
+                                  display: false,
+                                },
+                                ticks: {
+                                  color: '#9ca3af',
+                                },
                               },
                             },
-                            x: {
-                              grid: {
+                            plugins: {
+                              legend: {
                                 display: false,
                               },
-                              ticks: {
-                                color: '#9ca3af',
-                              },
                             },
-                          },
-                          plugins: {
-                            legend: {
-                              display: false,
-                            },
-                          },
-                        }}
-                      />
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-gray-900/80 backdrop-blur-lg p-8 rounded-xl border border-gray-800 shadow-2xl">
+                      <h2 className="text-xl font-semibold text-gray-100 mb-4">
+                        Severity Trend
+                      </h2>
+                      <div className="h-64">
+                        <Line
+                          data={chartData.severityData}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                              y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                  color: '#111827',
+                                },
+                                ticks: {
+                                  color: '#9ca3af',
+                                },
+                              },
+                              x: {
+                                grid: {
+                                  display: false,
+                                },
+                                ticks: {
+                                  color: '#9ca3af',
+                                },
+                              },
+                            },
+                            plugins: {
+                              legend: {
+                                display: false,
+                              },
+                            },
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-900/80 backdrop-blur-lg p-8 rounded-xl border border-gray-800 shadow-2xl">
+                      <h2 className="text-xl font-semibold text-gray-100 mb-4">
+                        Category Comparison
+                      </h2>
+                      <div className="h-64">
+                        <Radar
+                          data={chartData.radarData}
+                          options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                              r: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                  color: '#111827',
+                                },
+                                angleLines: {
+                                  color: '#111827',
+                                },
+                                pointLabels: {
+                                  color: '#9ca3af',
+                                },
+                                ticks: {
+                                  color: '#9ca3af',
+                                  backdropColor: 'transparent',
+                                },
+                              },
+                            },
+                            plugins: {
+                              legend: {
+                                display: false,
+                              },
+                            },
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-900/80 backdrop-blur-lg p-8 rounded-xl border border-gray-800 shadow-2xl">
                     <h2 className="text-xl font-semibold text-gray-100 mb-4">
-                      Category Comparison
+                      Category Distribution
                     </h2>
                     <div className="h-64">
-                      <Radar
-                        data={chartData.radarData}
+                      <PolarArea
+                        data={chartData.polarData}
                         options={{
                           responsive: true,
                           maintainAspectRatio: false,
@@ -647,12 +720,6 @@ const Parents: React.FC = () => {
                               grid: {
                                 color: '#111827',
                               },
-                              angleLines: {
-                                color: '#111827',
-                              },
-                              pointLabels: {
-                                color: '#9ca3af',
-                              },
                               ticks: {
                                 color: '#9ca3af',
                                 backdropColor: 'transparent',
@@ -661,145 +728,112 @@ const Parents: React.FC = () => {
                           },
                           plugins: {
                             legend: {
-                              display: false,
+                              position: 'right',
+                              labels: {
+                                color: '#9ca3af',
+                              },
                             },
                           },
                         }}
                       />
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
-                  <h2 className="text-xl font-semibold text-gray-100 mb-4">
-                    Category Distribution
-                  </h2>
-                  <div className="h-64">
-                    <PolarArea
-                      data={chartData.polarData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                          r: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: {
-                              color: '#111827',
-                            },
-                            ticks: {
-                              color: '#9ca3af',
-                              backdropColor: 'transparent',
-                            },
-                          },
-                        },
-                        plugins: {
-                          legend: {
-                            position: 'right',
-                            labels: {
-                              color: '#9ca3af',
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-gray-900 p-8 rounded-xl border border-gray-800 shadow-2xl">
-                  <h2 className="text-2xl font-bold text-emerald-400 mb-6">
-                    Recommendations
-                  </h2>
-                  <div className="grid gap-6">
-                    {Object.entries(result.recommendations).map(([category, recs]) => (
-                      <div key={category} className="bg-gray-800 p-6 rounded-lg border border-gray-700 hover:border-emerald-400 transition-all duration-300">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center">
-                            <h3 className="text-lg font-semibold text-emerald-400">
-                              {categories[category]}
-                            </h3>
-                            <div className="ml-4 w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-emerald-500 transition-all duration-500"
-                                style={{ width: `${result.category_scores[category]}%` }}
-                              />
-                            </div>
-                          </div>
-                          <span className="text-emerald-400 font-medium">
-                            {result.category_scores[category]}%
-                          </span>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          {recs.map((rec, index) => (
-                            <div key={index} className="flex items-start p-3 bg-gray-700 rounded-lg hover:bg-gray-600 transition-all duration-200">
-                              <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-emerald-500 rounded-full mr-3 mt-1">
-                                <span className="text-white text-sm font-bold">{index + 1}</span>
+                  <div className="bg-gray-900/80 backdrop-blur-lg p-8 rounded-xl border border-gray-800 shadow-2xl">
+                    <h2 className="text-2xl font-bold text-emerald-400 mb-6">
+                      Recommendations
+                    </h2>
+                    <div className="grid gap-6">
+                      {Object.entries(result.recommendations).map(([category, recs]) => (
+                        <div key={category} className="bg-gray-800/90 p-6 rounded-lg border border-gray-700 hover:border-emerald-400 transition-all duration-300">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center">
+                              <h3 className="text-lg font-semibold text-emerald-400">
+                                {categories[category]}
+                              </h3>
+                              <div className="ml-4 w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-emerald-500 transition-all duration-500"
+                                  style={{ width: `${result.category_scores[category]}%` }}
+                                />
                               </div>
-                              <p className="text-gray-200 leading-relaxed">
-                                {rec}
-                              </p>
                             </div>
-                          ))}
-                        </div>
+                            <span className="text-emerald-400 font-medium">
+                              {result.category_scores[category]}%
+                            </span>
+                          </div>
+                          
+                          <div className="space-y-4">
+                            {recs.map((rec, index) => (
+                              <div key={index} className="flex items-start p-3 bg-gray-700/90 rounded-lg hover:bg-gray-600 transition-all duration-200">
+                                <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-emerald-500 rounded-full mr-3 mt-1">
+                                  <span className="text-white text-sm font-bold">{index + 1}</span>
+                                </div>
+                                <p className="text-gray-200 leading-relaxed">
+                                  {rec}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
 
-                        <div className="mt-4 pt-4 border-t border-gray-700">
-                          <div className="flex items-center text-sm text-gray-400">
-                            <svg className="w-4 h-4 mr-2 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Based on {categories[category]} assessment</span>
+                          <div className="mt-4 pt-4 border-t border-gray-700">
+                            <div className="flex items-center text-sm text-gray-400">
+                              <svg className="w-4 h-4 mr-2 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>Based on {categories[category]} assessment</span>
+                            </div>
                           </div>
                         </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-8 p-6 bg-gray-800/90 rounded-lg border border-gray-700">
+                      <div className="flex items-center mb-4">
+                        <svg className="w-6 h-6 text-emerald-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3 className="text-lg font-semibold text-emerald-400">
+                          Next Steps
+                        </h3>
                       </div>
-                    ))}
+                      <div className="space-y-3">
+                        <p className="text-gray-300">
+                          These recommendations are based on your child's assessment results. Consider implementing them gradually and monitoring progress.
+                        </p>
+                        <p className="text-gray-300">
+                          For more detailed guidance, consult with educational specialists or schedule a follow-up assessment.
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="mt-8 p-6 bg-gray-800 rounded-lg border border-gray-700">
-                    <div className="flex items-center mb-4">
-                      <svg className="w-6 h-6 text-emerald-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <div className="flex justify-center space-x-4">
+                    <button
+                      className="px-8 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 border border-emerald-400 transition-all duration-200 flex items-center"
+                      onClick={handleReset}
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
-                      <h3 className="text-lg font-semibold text-emerald-400">
-                        Next Steps
-                      </h3>
-                    </div>
-                    <div className="space-y-3">
-                      <p className="text-gray-300">
-                        These recommendations are based on your child's assessment results. Consider implementing them gradually and monitoring progress.
-                      </p>
-                      <p className="text-gray-300">
-                        For more detailed guidance, consult with educational specialists or schedule a follow-up assessment.
-                      </p>
-                    </div>
+                      Start New Assessment
+                    </button>
+                    <button
+                      className="px-8 py-3 bg-gray-800/90 text-emerald-400 rounded-lg hover:bg-gray-700 border border-emerald-400 transition-all duration-200 flex items-center"
+                      onClick={handleDownloadPDF}
+                    >
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Download PDF Report
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex justify-center space-x-4">
-                  <button
-                    className="px-8 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 border border-emerald-400 transition-all duration-200 flex items-center"
-                    onClick={handleReset}
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Start New Assessment
-                  </button>
-                  <button
-                    className="px-8 py-3 bg-gray-800 text-emerald-400 rounded-lg hover:bg-gray-700 border border-emerald-400 transition-all duration-200 flex items-center"
-                    onClick={handleDownloadPDF}
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Download PDF Report
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+              )}
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 };

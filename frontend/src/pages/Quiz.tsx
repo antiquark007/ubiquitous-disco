@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Brain, Target, Trophy, Clock, LayoutDashboard, BookOpen, Brain as BrainIcon, LogOut, ChevronLeft, ChevronRight, Activity, Users, BarChart2, User } from 'lucide-react';
+import { Brain, Target, Trophy, Clock } from 'lucide-react';
+import { Sidebar } from '../components/Sidebar';
+import { ThreeScene } from '../components/ThreeScene';
 
 interface QuizLevel {
   id: number;
@@ -13,80 +15,26 @@ interface QuizLevel {
   icon: React.ReactNode;
 }
 
-function Sidebar({ isCollapsed, toggleSidebar }: { isCollapsed: boolean; toggleSidebar: () => void }) {
-  const navigate = useNavigate();
-  
-  const handleLogout = () => {
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('userEmail');
-    navigate('/');
-  };
-
-  const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', onClick: () => navigate('/dashboard') },
-    { icon: BookOpen, label: 'Quiz', active: true },
-    { icon: BrainIcon, label: 'Analysis', onClick: () => navigate('/analysis') },
-    { icon: Activity, label: 'Activities' },
-    { icon: Users, label: 'Community' },
-    { icon: BarChart2, label: 'Analytics' },
-    { icon: User, label: 'Profile', onClick: () => navigate('/profile') },
-  ];
-
-  return (
-    <motion.div
-      initial={{ width: isCollapsed ? 80 : 250 }}
-      animate={{ width: isCollapsed ? 80 : 250 }}
-      className="h-screen bg-black/50 backdrop-blur-lg border-r border-green-500/10 flex flex-col relative z-10"
-    >
-      <div className="p-4 flex items-center justify-between">
-        {!isCollapsed && <h1 className="text-2xl font-bold text-green-400">DyslexiaAI</h1>}
-        <button
-          onClick={toggleSidebar}
-          className="p-2 rounded-lg hover:bg-green-500/10 transition-colors"
-        >
-          {isCollapsed ? <ChevronRight className="w-5 h-5 text-green-400" /> : <ChevronLeft className="w-5 h-5 text-green-400" />}
-        </button>
-      </div>
-
-      <nav className="flex-1 mt-8">
-        {menuItems.map(({ icon: Icon, label, active, onClick }) => (
-          <motion.button
-            key={label}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`w-full flex items-center p-4 space-x-4 text-left transition-colors ${
-              active ? 'bg-green-500/10 text-green-400' : 'text-white/80 hover:bg-green-500/5'
-            }`}
-            onClick={onClick}
-          >
-            <Icon className="w-5 h-5" />
-            {!isCollapsed && <span>{label}</span>}
-          </motion.button>
-        ))}
-      </nav>
-
-      <div className="p-4 border-t border-green-500/10">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleLogout}
-          className="flex items-center space-x-4 text-white/80 hover:text-green-400 transition-colors"
-        >
-          <LogOut className="w-5 h-5" />
-          {!isCollapsed && <span>Logout</span>}
-        </motion.button>
-      </div>
-    </motion.div>
-  );
-}
-
 function Quiz() {
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [quizLevels, setQuizLevels] = useState<QuizLevel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const navigate = useNavigate();
+
+  // Track mouse position for the glow effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setCursorPosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchQuizLevels = async () => {
@@ -131,7 +79,21 @@ function Quiz() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
+    <div className="flex h-screen bg-black text-white relative overflow-hidden">
+      {/* Circular Disk Pointer */}
+      <div
+        className="pointer-events-none fixed top-0 left-0 w-[600px] h-[600px] rounded-full bg-gradient-to-r from-green-300 via-green-500 to-green-700 opacity-15 blur-[200px] transition-transform duration-75"
+        style={{
+          transform: `translate(${cursorPosition.x - 300}px, ${cursorPosition.y - 300}px)`,
+        }}
+      ></div>
+
+      {/* Three.js Background */}
+      <div className="absolute inset-0">
+        <ThreeScene />
+      </div>
+      
+      {/* Use the shared Sidebar component */}
       <Sidebar isCollapsed={isCollapsed} toggleSidebar={() => setIsCollapsed(!isCollapsed)} />
       
       <main className="flex-1 p-8 overflow-y-auto relative z-10">
