@@ -158,5 +158,3 @@ Backend: `https://dylexiaai.onrender.com/`
 # Contact us 
 ## aksmlibts@gmail.com
 ## 7827191427
-
-
