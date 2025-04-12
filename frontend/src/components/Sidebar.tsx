@@ -45,7 +45,7 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
       <div className="p-4 flex items-center justify-between">
         {!isCollapsed && (
           <h1 className="text-2xl font-bold text-green-400">
-            <button onClick={() => navigate('/dashboard')}>DyslexiaAI</button>
+            <button onClick={() => navigate('/')}>DyslexAI</button>
           </h1>
         )}
         <button
