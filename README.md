@@ -6,7 +6,7 @@
 
 ---
 
-## Table of Contents
+## 📖 Table of Contents
 
 1. [Introduction](#introduction)
 2. [Problem Statement](#problem-statement)
@@ -18,19 +18,23 @@
 
 ---
 
-## Introduction
+## 🧠 Introduction
+
+Dyslexia, a common learning difficulty affecting 15–20% of the global population, often goes undiagnosed until it significantly impacts academic and emotional development. Many students face delayed diagnosis due to the lack of accessible tools, leading to missed opportunities for timely intervention.
+
+Our platform bridges this gap using **AI-powered multimodal detection** and **personalized learning tools**, transforming how dyslexia and similar learning challenges are identified and addressed in early education.
 
 Our project presents an advanced educational tool that leverages eye-tracking and audio analysis to detect and support students with dyslexia and other learning disabilities. It builds a complete ecosystem connecting students, teachers, and support professionals to ensure early identification and intervention.
 
 ---
 
-## Problem Statement
+## ❗ Problem Statement
 
 Dyslexia affects 15–20% of the population, with many cases going undetected. Traditional diagnostic methods miss up to 50% of dyslexic students, delaying help and negatively impacting their academic growth and self-esteem. Our solution addresses the need for accurate, early diagnosis and tailored educational support.
 
 ---
 
-## Solution Overview
+## ✅ Solution Overview
 
 We propose a unified platform that:
 
@@ -50,7 +54,7 @@ We propose a unified platform that:
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 - **Frontend:** React.js (Web), Flutter (Mobile App)
 - **Backend:** Flask (Python)
@@ -61,7 +65,7 @@ We propose a unified platform that:
 
 ---
 
-## Architecture / Diagram (if any)
+## 🧩 Architecture / Diagram (if any)
 
 ![System Architecture](./system_architecture.png)
 ![FlowChart](./flowchart.png)
@@ -70,7 +74,7 @@ We propose a unified platform that:
 
 ---
 
-## Installation & Usage
+## 🧪 Installation & Usage
 
 ### Prerequisites
 
