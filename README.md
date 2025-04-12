@@ -71,6 +71,7 @@ We propose a unified platform that:
 - **Database:** MongoDB
 - **Core Logic & ML:** OpenCV, Mediapipe
 - **Tools:** GitHub, VSCode
+- **Hosting:** Vercel, Render
 
 ---
 
@@ -141,7 +142,9 @@ We have well maintained proper backend documentation
 After cloning Access the API at `http://localhost:8000/docs`
 Our Hosted API DOCS: `https://dylexiaai.onrender.com/docs` and `https://dylexiaai.onrender.com/redoc` 
 
-Our Hosted Project: `https://dylexia.vercel.app/`
+Our Hosted Project: 
+Frontend: `https://dylexia.vercel.app/`
+Backend: `https://dylexiaai.onrender.com/`
 
 ## Team Members
 
