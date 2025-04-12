@@ -54,10 +54,10 @@ We propose a unified platform that:
 
 - **Frontend:** React.js (Web), Flutter (Mobile App)
 - **Backend:** Flask (Python)
-- **Database:** PostgreSQL
+- **Database:** MongoDB
 - **Core Logic & ML:** Python with audio and gaze-tracking libraries
 - **Performance Modules:** WebAssembly (WASM)
-- **Tools:** GitHub, Figma, Jupyter Notebook_
+- **Tools:** GitHub, Figma, Jupyter Notebook
 
 ---
 
