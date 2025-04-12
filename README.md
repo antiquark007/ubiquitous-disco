@@ -50,7 +50,7 @@ We propose a unified platform that:
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend:** React.js (Web), Flutter (Mobile App)
 - **Backend:** Flask (Python)
@@ -99,3 +99,13 @@ npm install
 
 # Start the development server
 npm run dev
+---
+### 👥 Team Members
+
+
+- Aaradhya Saikia
+- Amit Kumar Singh
+- Ved Prakash Singh
+- Adwait Aayush
+
+> 💡 Each member contributed to ideation, testing, and final presentation.
