@@ -17,6 +17,8 @@ import { PronunciationGame } from '../pages/games/PronunciationGame';
 import { MathGame } from '../pages/games/MathGame';
 import { MemoryGame } from '../pages/games/MemoryGame';
 import { CreativeThinkingGame } from '../pages/games/CreativeThinkingGame';
+import ChatBot from '../pages/ChatBot';
+import ChatbotWrapper from '../components/ChatbotWrapper';
 
 const router = createBrowserRouter([
   {
@@ -91,7 +93,7 @@ const router = createBrowserRouter([
   {
     path: '/games/creative',
     element: <CreativeThinkingGame />,
-  },
+  }
 ]);
 
 export default router;

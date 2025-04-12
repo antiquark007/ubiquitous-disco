@@ -68,7 +68,7 @@ function QuizQuestion() {
     const fetchQuizData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://dylexiaai.onrender.com/quiz/${id}`, {
+        const response = await fetch(`https://dylexia.onrender.com/quiz/${id}`, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
