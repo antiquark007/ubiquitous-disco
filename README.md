@@ -155,4 +155,8 @@ Backend: `https://dylexiaai.onrender.com/`
 
 > 💡 Each member contributed to ideation, testing, and final presentation.
 
+# Contact us 
+## aksmlibts@gmail.com
+## 7827191427
+
 
