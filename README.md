@@ -64,6 +64,7 @@ We propose a unified platform that:
 ## Architecture / Diagram (if any)
 
 ![System Architecture](./system_architecture.png)
+![FlowChart](./flowchart.png)
 
 > 📌 This includes Eye Tracking Module, Audio Analysis Engine, ML-Based Analyzer, Report Generator, and Web/App Interfaces.
 
