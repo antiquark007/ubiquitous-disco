@@ -301,44 +301,44 @@ def initialize_quizzes():
         return {"message": f"Initialized {len(quiz_data)} quizzes"}
     return {"message": "No quiz data to initialize"}
 
-@app.post("/quiz/submit")
-def submit_quiz_result(submission: QuizSubmission):
-    """Submit quiz results for a user"""
-    try:
-        user_oid = ObjectId(submission.user_id)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid user ID")
+# @app.post("/quiz/submit")
+# def submit_quiz_result(submission: QuizSubmission):
+#     """Submit quiz results for a user"""
+#     try:
+#         user_oid = ObjectId(submission.user_id)
+#     except Exception:
+#         raise HTTPException(status_code=400, detail="Invalid user ID")
 
-    # Check if user exists
-    user = users.find_one({"_id": user_oid})
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+#     # Check if user exists
+#     user = users.find_one({"_id": user_oid})
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
 
-    # Check if quiz exists
-    quiz = quizzes.find_one({"id": submission.quiz_id})
-    if not quiz:
-        raise HTTPException(status_code=404, detail="Quiz not found")
+#     # Check if quiz exists
+#     quiz = quizzes.find_one({"id": submission.quiz_id})
+#     if not quiz:
+#         raise HTTPException(status_code=404, detail="Quiz not found")
 
-    # Update user's quiz progress
-    submission_data = submission.dict()
-    submission_data["completed_at"] = datetime.utcnow()
+#     # Update user's quiz progress
+#     submission_data = submission.dict()
+#     submission_data["completed_at"] = datetime.utcnow()
     
-    # Store in users collection
-    users.update_one(
-        {"_id": user_oid},
-        {
-            "$push": {
-                "quiz_progress": {
-                    "quiz_id": submission.quiz_id,
-                    "score": submission.score,
-                    "completed_at": submission_data["completed_at"],
-                    "answers": submission.answers
-                }
-            }
-        }
-    )
+#     # Store in users collection
+#     users.update_one(
+#         {"_id": user_oid},
+#         {
+#             "$push": {
+#                 "quiz_progress": {
+#                     "quiz_id": submission.quiz_id,
+#                     "score": submission.score,
+#                     "completed_at": submission_data["completed_at"],
+#                     "answers": submission.answers
+#                 }
+#             }
+#         }
+#     )
     
-    return {"message": "Quiz results submitted successfully"}
+#     return {"message": "Quiz results submitted successfully"}
 
 @app.post("/quiz/submit")
 def submit_quiz_result(
