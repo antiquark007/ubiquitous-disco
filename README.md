@@ -99,7 +99,7 @@ npm install
 # Start the development server
 npm run dev
 ```
-### 👥 Team Members
+## Team Members
 
 
 - Aaradhya Saikia
