@@ -19,6 +19,7 @@ import { MemoryGame } from '../pages/games/MemoryGame';
 import { CreativeThinkingGame } from '../pages/games/CreativeThinkingGame';
 import ChatBot from '../pages/ChatBot';
 import ChatbotWrapper from '../components/ChatbotWrapper';
+import Dashboard2 from '../pages/Dashboard2';
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
   {
     path: '/dashboard',
     element: <Dashboard />,
+  },
+  {
+    path: '/dashboard2',
+    element: <Dashboard2 />,
   },
   {
     path: '/about',

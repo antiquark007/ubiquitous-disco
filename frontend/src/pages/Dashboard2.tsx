@@ -32,7 +32,7 @@ export default function Dashboard2() {
         <img 
           src={Image}
           alt="Background" 
-          className="w-full h-full object-cover opacity-20"
+          className="w-full h-full object-cover opacity-40"
         />
       </div>
 

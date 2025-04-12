@@ -28,7 +28,7 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
   };
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard2' },
     { icon: BookOpen, label: 'Quiz', path: '/quiz' },
     { icon: BarChart2, label: 'Analysis', path: '/analysis' },
     { icon: Users, label: 'Parents', path: '/parents' },
@@ -40,7 +40,7 @@ export function Sidebar({ isCollapsed, toggleSidebar }: SidebarProps) {
     <motion.div
       initial={{ width: isCollapsed ? 80 : 250 }}
       animate={{ width: isCollapsed ? 80 : 250 }}
-      className="h-screen bg-black/50 backdrop-blur-lg border-r border-green-500/10 flex flex-col relative z-10"
+      className="h-screen bg-black border-r border-green-500/10 flex flex-col relative z-10"
     >
       <div className="p-4 flex items-center justify-between">
         {!isCollapsed && (
