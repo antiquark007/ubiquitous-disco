@@ -6,31 +6,31 @@
 
 ---
 
-## 📖 Table of Contents
+## Table of Contents
 
-1. [Introduction](#-introduction)
-2. [Problem Statement](#-problem-statement)
-3. [Solution Overview](#-solution-overview)
-4. [Tech Stack](#-tech-stack)
-5. [Architecture / Diagram (if any)](#-architecture--diagram-if-any)
-6. [Installation & Usage](#-installation--usage)
-7. [Team Members](#-team-members)
+1. [Introduction](#introduction)
+2. [Problem Statement](#problem-statement)
+3. [Solution Overview](#solution-overview)
+4. [Tech Stack](#tech-stack)
+5. [Architecture / Diagram (if any)](#architecture--diagram-if-any)
+6. [Installation & Usage](#installation--usage)
+7. [Team Members](#team-members)
 
 ---
 
-## 🧠 Introduction
+## Introduction
 
 Our project presents an advanced educational tool that leverages eye-tracking and audio analysis to detect and support students with dyslexia and other learning disabilities. It builds a complete ecosystem connecting students, teachers, and support professionals to ensure early identification and intervention.
 
 ---
 
-## ❗ Problem Statement
+## Problem Statement
 
 Dyslexia affects 15–20% of the population, with many cases going undetected. Traditional diagnostic methods miss up to 50% of dyslexic students, delaying help and negatively impacting their academic growth and self-esteem. Our solution addresses the need for accurate, early diagnosis and tailored educational support.
 
 ---
 
-## ✅ Solution Overview
+## Solution Overview
 
 We propose a unified platform that:
 
@@ -61,16 +61,15 @@ We propose a unified platform that:
 
 ---
 
-## 🧩 Architecture / Diagram (if any)
+## Architecture / Diagram (if any)
 
-_![System Architecture](./assets/system-architecture.png)_
+![System Architecture](./assets/system-architecture.png)
 
-> 📌 This includes Eye Tracking Module, Audio Analysis Engine, ML-Based Analyzer, Report Generator, and Web/App Interfaces. 
-> `![Alt Text](./assets/your-image.png)`
+> 📌 This includes Eye Tracking Module, Audio Analysis Engine, ML-Based Analyzer, Report Generator, and Web/App Interfaces.
 
 ---
 
-## 🧪 Installation & Usage
+## Installation & Usage
 
 ### Prerequisites
 
@@ -99,7 +98,7 @@ npm install
 
 # Start the development server
 npm run dev
----
+```
 ### 👥 Team Members
 
 
