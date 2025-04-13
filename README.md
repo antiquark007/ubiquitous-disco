@@ -1,9 +1,5 @@
 # 🚀 Enhanced Tools for Dyslexia and Learning Disabilities in Students
 
-**Team Name:** _Innov8ors_  
-**Hackathon:** _FantomCode2025_  
-**Date:** _12/04/2025_
-
 ---
 
 ## 📖 Table of Contents
@@ -146,15 +142,8 @@ Our Hosted Project:
 Frontend: `https://dylexia.vercel.app/`
 Backend: `https://dylexiaai.onrender.com/`
 
-## Team Members
-
-- Aaradhya Saikia
-- Amit Kumar Singh
-- Ved Prakash Singh
-- Adwait Aayush
-
 > 💡 Each member contributed to ideation, testing, and final presentation.
 
-# Contact us 
-## aksmlibts@gmail.com
-## 7827191427
+# Contact
+## vedp5585@gmail.com
+## 6205420832
