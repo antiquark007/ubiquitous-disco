@@ -10,7 +10,6 @@
 4. [Tech Stack](#tech-stack)
 5. [Architecture / Diagram (if any)](#architecture--diagram-if-any)
 6. [Installation & Usage](#installation--usage)
-7. [Team Members](#team-members)
 
 ---
 
